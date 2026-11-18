@@ -8,7 +8,7 @@
     "test": "node --check server.js app.js backend/db.js backend/whatsappService.js"
   },
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "^8.23.1"
   },
   "keywords": [
     "pilates",
