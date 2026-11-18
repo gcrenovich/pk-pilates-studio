@@ -291,11 +291,28 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`====================================================`);
-  console.log(`🧘 PILATES KINÉSICO`);
-  console.log(`🌐 Servidor iniciado con éxito (API REST + WhatsApp Webhook):`);
-  console.log(`👉 En esta computadora:  http://localhost:${PORT}`);
-  console.log(`👉 En tu celular (mismo WiFi): http://<TU_IP_LOCAL>:${PORT}`);
-  console.log(`====================================================`);
-});
+async function startServer() {
+  if (db.initPostgres) {
+    try {
+      await db.initPostgres();
+    } catch (err) {
+      console.warn('Advertencia inicializando base de datos:', err.message);
+    }
+  }
+
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`====================================================`);
+    console.log(`🧘 PILATES KINÉSICO`);
+    console.log(`🌐 Servidor iniciado con éxito (API REST + WhatsApp Webhook):`);
+    console.log(`👉 En esta computadora:  http://localhost:${PORT}`);
+    console.log(`👉 En tu celular (mismo WiFi): http://<TU_IP_LOCAL>:${PORT}`);
+    if (process.env.DATABASE_URL) {
+      console.log(`🗄️ Persistencia en la nube activada (PostgreSQL conectado)`);
+    } else {
+      console.log(`💾 Persistencia local (JSON en disco)`);
+    }
+    console.log(`====================================================`);
+  });
+}
+
+startServer();

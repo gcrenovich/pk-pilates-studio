@@ -8,6 +8,19 @@
 const fs = require('fs');
 const path = require('path');
 
+let pgPool = null;
+if (process.env.DATABASE_URL) {
+  try {
+    const { Pool } = require('pg');
+    pgPool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+    });
+  } catch (err) {
+    console.warn('PostgreSQL client no disponible en este entorno:', err.message);
+  }
+}
+
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 
@@ -454,6 +467,43 @@ class Database {
   constructor() {
     this.ensureDirectory();
     this.data = this.read();
+    this.postgresInitialized = false;
+  }
+
+  async initPostgres() {
+    if (!pgPool) return;
+    try {
+      // 1. Crear tabla para almacenamiento de estado y auditoría si no existe
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS pk_app_state (
+          key VARCHAR(50) PRIMARY KEY,
+          data JSONB NOT NULL,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // 2. Intentar cargar el último estado guardado
+      const res = await pgPool.query(`SELECT data FROM pk_app_state WHERE key = 'app_data' LIMIT 1;`);
+      if (res.rows.length > 0 && res.rows[0].data) {
+        this.data = res.rows[0].data;
+        this.postgresInitialized = true;
+        console.log(`✅ [PostgreSQL] Estado cargado exitosamente (${this.data.alumnos?.length || 0} alumnos, ${this.data.turnos?.length || 0} turnos).`);
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+        } catch (e) {}
+      } else {
+        // Primera ejecución con la base de datos vacía: sembrar datos iniciales
+        await pgPool.query(`
+          INSERT INTO pk_app_state (key, data, updated_at)
+          VALUES ('app_data', $1, CURRENT_TIMESTAMP)
+          ON CONFLICT (key) DO UPDATE SET data = EXCLUDED.data, updated_at = CURRENT_TIMESTAMP;
+        `, [JSON.stringify(this.data)]);
+        this.postgresInitialized = true;
+        console.log('✅ [PostgreSQL] Datos iniciales sincronizados en la nube.');
+      }
+    } catch (err) {
+      console.error('⚠️ [PostgreSQL] Error de inicialización/sincronización:', err.message);
+    }
   }
 
   ensureDirectory() {
@@ -487,11 +537,22 @@ class Database {
   save() {
     try {
       fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
-      return true;
     } catch (e) {
-      console.error('Error guardando DB:', e);
-      return false;
+      console.error('Error guardando DB en disco:', e);
     }
+
+    // Sincronización en tiempo real con PostgreSQL
+    if (pgPool) {
+      pgPool.query(`
+        INSERT INTO pk_app_state (key, data, updated_at)
+        VALUES ('app_data', $1, CURRENT_TIMESTAMP)
+        ON CONFLICT (key) DO UPDATE SET data = EXCLUDED.data, updated_at = CURRENT_TIMESTAMP;
+      `, [JSON.stringify(this.data)]).catch(err => {
+        console.error('⚠️ [PostgreSQL] Error al persistir datos:', err.message);
+      });
+    }
+
+    return true;
   }
 
   // Configuración
