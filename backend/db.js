@@ -844,7 +844,6 @@ class Database {
 
     turno.inscriptos.push(nombreAlumno);
 
-    let alumno = this.data.alumnos.find(a => a.nombre.toLowerCase() === nombreAlumno.toLowerCase());
     if (!alumno) {
       const profe = this.data.profesionales.find(p => p.id === turno.profesorId);
       const hoy = new Date();
