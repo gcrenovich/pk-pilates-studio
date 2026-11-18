@@ -120,9 +120,10 @@
                 <span>Alumnos</span>
               </button>
               <button id="btnRoleProfe" onclick="setRole('profesor')" 
-                class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple">
+                class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple">
                 <i class="fa-solid fa-lock text-[11px] text-pk-purple"></i>
-                <span>Panel de Control (ABM)</span>
+                <span class="hidden sm:inline">Panel de Control (ABM)</span>
+                <span class="sm:hidden">Admin</span>
               </button>
             </div>
             <button id="btnNavBloquear" onclick="cerrarSesionAdmin()" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold transition items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 shadow-2xs cursor-pointer" title="Cerrar sesión y bloquear panel bajo clave">
@@ -206,7 +207,7 @@
       </section>
 
       <!-- SECCIÓN: ARANCELES MENSUALES (PARTICULAR & INSTITUTO DE SEGURO) -->
-      <section id="seccionAranceles" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+      <section id="seccionAranceles" class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs">
         <div class="mb-4">
           <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
             <i class="fa-solid fa-file-invoice-dollar text-pk-teal"></i>
@@ -215,42 +216,48 @@
           <p class="text-xs text-slate-500">Tarifas vigentes para clases de Pilates Kinésico en camillas Reformer.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Particular -->
-          <div class="p-4 rounded-xl border border-purple-200 bg-gradient-to-br from-white to-purple-50/40 relative flex flex-col justify-between">
+          <div class="p-4 sm:p-5 rounded-2xl border border-purple-200 bg-gradient-to-br from-white to-purple-50/40 relative flex flex-col justify-between shadow-xs">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="px-2.5 py-0.5 bg-pk-purple text-white rounded text-[10px] font-extrabold uppercase">Plan Particular</span>
-                <span class="text-xs font-bold text-slate-500">2 Clases Semanales</span>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <span class="px-2.5 py-1 bg-pk-purple text-white rounded-md text-[10px] font-black uppercase tracking-wider shrink-0">Plan Particular</span>
+                <span class="text-xs font-bold text-slate-500 whitespace-nowrap">2 Clases Semanales</span>
               </div>
               <h3 class="text-base font-black text-slate-900 mb-1">Particular</h3>
-              <p class="text-xs text-slate-600 mb-3">
+              <p class="text-xs text-slate-600 mb-4 leading-relaxed">
                 Incluye 2 clases semanales personalizadas con seguimiento a cargo de Kinesiólogos y Fisioterapeutas.
               </p>
             </div>
-            <div class="flex items-center justify-between pt-3 border-t border-purple-100">
-              <span class="text-xl font-black text-pk-purple">$50.000 <span class="text-xs text-slate-500 font-normal">/mes</span></span>
-              <a href="#seccionTurnos" class="px-3.5 py-1.5 bg-pk-purple text-white text-xs font-bold rounded-lg hover:bg-pk-purpleDark transition">
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-purple-100">
+              <div>
+                <span class="text-xl font-black text-pk-purple">$50.000</span>
+                <span class="text-xs text-slate-500 font-normal"> /mes</span>
+              </div>
+              <a href="#seccionInscripcionAlumno" class="px-4 py-2 bg-pk-purple text-white text-xs font-bold rounded-xl hover:bg-pk-purpleDark transition shadow-xs text-center shrink-0">
                 Anotarme
               </a>
             </div>
           </div>
 
           <!-- Obra Social Instituto de Seguro -->
-          <div class="p-4 rounded-xl border border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 relative flex flex-col justify-between">
+          <div class="p-4 sm:p-5 rounded-2xl border border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 relative flex flex-col justify-between shadow-xs">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="px-2.5 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-extrabold uppercase">Convenio Especial</span>
-                <span class="text-xs font-bold text-emerald-700">Presentando Carnet</span>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <span class="px-2.5 py-1 bg-emerald-600 text-white rounded-md text-[10px] font-black uppercase tracking-wider shrink-0">Convenio Especial</span>
+                <span class="text-xs font-bold text-emerald-700 whitespace-nowrap">Presentando Carnet</span>
               </div>
               <h3 class="text-base font-black text-slate-900 mb-1">Obra Social Instituto de Seguro</h3>
-              <p class="text-xs text-slate-600 mb-3">
+              <p class="text-xs text-slate-600 mb-4 leading-relaxed">
                 $35.000 mensuales presentando el carnet correspondiente de la obra social. Incluye 2 clases semanales.
               </p>
             </div>
-            <div class="flex items-center justify-between pt-3 border-t border-emerald-100">
-              <span class="text-xl font-black text-emerald-700">$35.000 <span class="text-xs text-slate-500 font-normal">/mes</span></span>
-              <a href="#seccionTurnos" class="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition">
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-emerald-100">
+              <div>
+                <span class="text-xl font-black text-emerald-700">$35.000</span>
+                <span class="text-xs text-slate-500 font-normal"> /mes</span>
+              </div>
+              <a href="#seccionInscripcionAlumno" class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition shadow-xs text-center shrink-0">
                 Anotarme con Carnet
               </a>
             </div>
@@ -411,24 +418,24 @@
           </div>
 
           <!-- Alias con botón de copiado -->
-          <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-purple-100">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-3 rounded-lg border border-purple-100">
             <div>
               <span class="text-[10px] uppercase font-bold text-pk-purple block">Alias para Transferir:</span>
-              <span id="txtAliasValue" class="text-sm font-extrabold text-slate-900">gustavo.moyano.pk</span>
+              <span id="txtAliasValue" class="text-sm font-extrabold text-slate-900 break-all">gustavo.moyano.pk</span>
             </div>
-            <button onclick="copiarTexto('txtAliasValue', 'btnCopiarAlias')" id="btnCopiarAlias" class="px-3 py-1.5 bg-purple-50 hover:bg-pk-purple hover:text-white text-pk-purple border border-purple-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+            <button onclick="copiarTexto('txtAliasValue', 'btnCopiarAlias')" id="btnCopiarAlias" class="px-3 py-1.5 bg-purple-50 hover:bg-pk-purple hover:text-white text-pk-purple border border-purple-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 self-start sm:self-auto">
               <i class="fa-regular fa-copy"></i>
               <span>Copiar Alias</span>
             </button>
           </div>
 
           <!-- CBU / CVU con botón de copiado -->
-          <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-3 rounded-lg border border-slate-200">
             <div>
               <span class="text-[10px] uppercase font-bold text-slate-500 block">CVU / CBU:</span>
-              <span id="txtCbuValue" class="text-xs font-mono font-bold text-slate-800">2850590940090418135201</span>
+              <span id="txtCbuValue" class="text-xs font-mono font-bold text-slate-800 break-all">2850590940090418135201</span>
             </div>
-            <button onclick="copiarTexto('txtCbuValue', 'btnCopiarCbu')" id="btnCopiarCbu" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-800 hover:text-white text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+            <button onclick="copiarTexto('txtCbuValue', 'btnCopiarCbu')" id="btnCopiarCbu" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-800 hover:text-white text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 self-start sm:self-auto">
               <i class="fa-regular fa-copy"></i>
               <span>Copiar</span>
             </button>
@@ -1769,7 +1776,7 @@
 
           if (estaLleno) {
             return `
-              <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-100/80 cursor-not-allowed opacity-75">
+              <label class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-100/80 cursor-not-allowed opacity-75 gap-2">
                 <div class="flex items-center gap-2.5">
                   <input type="checkbox" disabled class="w-4 h-4 text-slate-400 rounded cursor-not-allowed">
                   <div>
@@ -1777,7 +1784,7 @@
                     <span class="block text-[10px] text-slate-400">${t.tipo}</span>
                   </div>
                 </div>
-                <span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-lg text-[10px]">
+                <span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-lg text-[10px] self-start sm:self-auto">
                   <i class="fa-solid fa-lock mr-1"></i>Completo (${t.cupoMax} camas)
                 </span>
               </label>
@@ -1785,7 +1792,7 @@
           }
 
           return `
-            <label class="flex items-center justify-between p-3 rounded-xl border border-purple-100 bg-white hover:bg-purple-50/50 hover:border-purple-300 transition cursor-pointer shadow-xs">
+            <label class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-purple-100 bg-white hover:bg-purple-50/50 hover:border-purple-300 transition cursor-pointer shadow-xs gap-2">
               <div class="flex items-center gap-2.5">
                 <input type="checkbox" name="chkTurnoAlumno" value="${t.id}" data-dia="${t.dia}" data-hora="${t.hora}" onchange="actualizarResumenTurnosSeleccionados()" class="w-4 h-4 text-pk-purple rounded border-slate-300 focus:ring-pk-purple cursor-pointer">
                 <div>
@@ -1793,7 +1800,7 @@
                   <span class="block text-[10px] text-slate-500 font-medium">${t.tipo}</span>
                 </div>
               </div>
-              <span class="px-2.5 py-0.5 ${libres === 1 ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'} font-bold rounded-lg text-[10px] flex items-center gap-1">
+              <span class="px-2.5 py-0.5 ${libres === 1 ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'} font-bold rounded-lg text-[10px] flex items-center gap-1 self-start sm:self-auto">
                 <i class="fa-solid fa-bed text-pk-teal"></i> ${libres} ${libres === 1 ? 'última cama' : 'camas libres'} (de ${t.cupoMax})
               </span>
             </label>
