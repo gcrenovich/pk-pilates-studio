@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8E248F" />
+      <stop offset="50%" stop-color="#7A1E7B" />
+      <stop offset="100%" stop-color="#4A0E4B" />
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#00A8B5" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Fondo Redondeado con Borde Pulido -->
+  <rect x="4" y="4" width="120" height="120" rx="32" fill="url(#bgGrad)" />
+  <rect x="4" y="4" width="120" height="120" rx="32" fill="none" stroke="url(#tealGrad)" stroke-width="3" stroke-opacity="0.6" />
+
+  <!-- Arco de Movimiento / Contrología Corporal (Curva Vertebral & Reformer) -->
+  <path d="M 22 96 C 35 110, 85 116, 106 86 C 114 74, 110 52, 94 40 C 82 32, 68 34, 58 42" 
+        fill="none" 
+        stroke="url(#tealGrad)" 
+        stroke-width="7" 
+        stroke-linecap="round" 
+        filter="url(#shadow)" />
+
+  <!-- Letras Principales "PK" -->
+  <!-- Letra P -->
+  <text x="28" y="76" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+        font-weight="900" 
+        font-size="44" 
+        fill="url(#goldGrad)" 
+        filter="url(#shadow)">P</text>
+
+  <!-- Letra K -->
+  <text x="64" y="76" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+        font-weight="900" 
+        font-size="44" 
+        fill="url(#tealGrad)" 
+        filter="url(#shadow)">K</text>
+
+  <!-- Subtítulo o Puntos de Salud / Bienestar Kinesiológico -->
+  <circle cx="102" cy="38" r="6.5" fill="#22D3EE" filter="url(#shadow)" />
+  <circle cx="112" cy="52" r="3.5" fill="#FFFFFF" opacity="0.9" />
+
+  <!-- Línea decorativa base -->
+  <line x1="32" y1="84" x2="96" y2="84" stroke="url(#tealGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.8" />
+</svg>
