@@ -490,7 +490,7 @@ class Database {
         console.log(`✅ [PostgreSQL] Estado cargado exitosamente (${this.data.alumnos?.length || 0} alumnos, ${this.data.turnos?.length || 0} turnos).`);
         try {
           fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
-        } catch (e) {}
+        } catch (e) { }
       } else {
         // Primera ejecución con la base de datos vacía: sembrar datos iniciales
         await pgPool.query(`
