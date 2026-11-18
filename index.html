@@ -45,9 +45,19 @@
       border-radius: 40px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       min-height: 850px;
-      overflow: hidden;
+      overflow-y: auto;
       background: #f8fafc;
       position: relative;
+    }
+
+    /* Adaptación forzada de grillas dentro del simulador de celular en pantallas de escritorio */
+    .mobile-frame #gridAdminProfesores,
+    .mobile-frame #gridAdminPromos,
+    .mobile-frame #seccionAranceles > .grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .mobile-frame #kpisAdminGrid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     /* Grilla de turnos semanal SigueFit */
@@ -519,7 +529,7 @@
       </div>
 
       <!-- Métricas KPIs -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div id="kpisAdminGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <span class="text-[11px] font-bold text-slate-500 uppercase">Alumnos Totales</span>
           <p id="kpiAlumnosTotales" class="text-2xl font-black text-slate-900 mt-1">0</p>
@@ -806,25 +816,25 @@
               </button>
             </div>
 
-            <div id="gridAdminProfesores" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="gridAdminProfesores" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <!-- Dinámico -->
             </div>
           </div>
 
           <!-- PESTAÑA 4: GESTIÓN DE ARANCELES -->
           <div id="subTabPromociones" class="space-y-4 hidden">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
               <div>
                 <h3 class="text-sm font-bold text-slate-800">Aranceles y Convenios de Obra Social</h3>
                 <p class="text-xs text-slate-500">Particular ($50.000) y Obra Social Instituto de Seguro ($35.000 con carnet).</p>
               </div>
-              <button onclick="abrirModalNuevaPromo()" class="px-3.5 py-2 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5">
+              <button onclick="abrirModalNuevaPromo()" class="px-3.5 py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-auto shrink-0">
                 <i class="fa-solid fa-plus"></i>
                 Nuevo Arancel / Promo (Alta)
               </button>
             </div>
 
-            <div id="gridAdminPromos" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div id="gridAdminPromos" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <!-- Dinámico -->
             </div>
           </div>
@@ -3128,20 +3138,20 @@
         return `
           <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4 shadow-xs">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="px-2.5 py-0.5 bg-pk-purple text-white text-[10px] font-black rounded-md tracking-wider">${p.matricula}</span>
-                <span class="text-[10px] ${p.activo !== false ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-100 border-slate-200'} font-bold px-2.5 py-0.5 rounded-full border">
+              <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
+                <span class="px-2.5 py-0.5 bg-pk-purple text-white text-[10px] font-black rounded-md tracking-wider shrink-0">${p.matricula}</span>
+                <span class="text-[10px] ${p.activo !== false ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-100 border-slate-200'} font-bold px-2.5 py-0.5 rounded-full border shrink-0">
                   ${p.activo !== false ? '● Kinesiólogo Activo' : '○ En Licencia / Pausado'}
                 </span>
               </div>
 
               <div class="flex items-start gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-purple-100 text-pk-purple flex items-center justify-center font-black text-xl shadow-inner shrink-0">
+                <div class="w-11 h-11 rounded-2xl bg-purple-100 text-pk-purple flex items-center justify-center font-black text-lg shadow-inner shrink-0">
                   <i class="fa-solid fa-user-doctor"></i>
                 </div>
-                <div>
-                  <h4 class="text-sm sm:text-base font-black text-slate-900">${p.nombre}</h4>
-                  <p class="text-xs text-pk-tealDark font-bold">${p.especialidad}</p>
+                <div class="min-w-0 flex-1">
+                  <h4 class="text-sm sm:text-base font-black text-slate-900 break-words">${p.nombre}</h4>
+                  <p class="text-xs text-pk-tealDark font-bold break-words">${p.especialidad}</p>
                   <p class="text-[11px] text-slate-600 mt-1"><b>Días de Atención:</b> ${p.diasAtencion || 'A coordinar'}</p>
                   <p class="text-[10px] text-slate-500 font-medium">${p.turnosDetalle || ''}</p>
                 </div>
@@ -3160,35 +3170,35 @@
               </div>
 
               <!-- Datos de Cobro Directo -->
-              <div class="bg-white p-3 rounded-xl border border-purple-100 mt-3 space-y-1.5 text-xs">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-1">
+              <div class="bg-white p-3 rounded-xl border border-purple-100 mt-3 space-y-2 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-1 border-b border-slate-100 pb-1.5">
                   <span class="text-[10px] uppercase font-bold text-pk-purple flex items-center gap-1">
                     <i class="fa-solid fa-building-columns"></i> Cobros / Transferencias:
                   </span>
-                  <span class="text-[11px] font-bold text-slate-700">${p.banco}</span>
+                  <span class="text-[11px] font-bold text-slate-700 break-words">${p.banco}</span>
                 </div>
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-1">
                   <span class="text-slate-500 text-[11px]">Titular & CUIT:</span>
-                  <span class="text-slate-800 font-semibold text-[11px]">${p.titular || p.nombre} (${p.cuit || 'CUIT'})</span>
+                  <span class="text-slate-800 font-semibold text-[11px] break-words">${p.titular || p.nombre} (${p.cuit || 'CUIT'})</span>
                 </div>
-                <div class="flex items-center justify-between bg-purple-50/50 p-1.5 rounded-lg border border-purple-100">
-                  <span class="text-pk-purple font-mono font-bold text-[11px]">Alias: ${p.alias}</span>
-                  <span class="text-slate-400 font-mono text-[10px]">CBU: ${p.cbu ? p.cbu.slice(0, 8) + '...' : 'CBU'}</span>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-purple-50/50 p-2 rounded-lg border border-purple-100">
+                  <span class="text-pk-purple font-mono font-bold text-[11px] break-all">Alias: ${p.alias}</span>
+                  <span class="text-slate-500 font-mono text-[10px] break-all">CBU: ${p.cbu ? p.cbu : 'CBU'}</span>
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-between pt-3 border-t border-slate-200 gap-2">
-              <a href="https://wa.me/${p.telefono ? p.telefono.replace(/\D/g, '') : ''}" target="_blank" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 transition flex items-center gap-1 shadow-2xs">
+            <div class="flex flex-wrap items-center justify-between pt-3 border-t border-slate-200 gap-2">
+              <a href="https://wa.me/${p.telefono ? p.telefono.replace(/\D/g, '') : ''}" target="_blank" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 transition flex items-center gap-1.5 shadow-2xs">
                 <i class="fa-brands fa-whatsapp text-sm"></i>
-                <span class="hidden sm:inline">WhatsApp</span>
+                <span>WhatsApp</span>
               </a>
 
-              <div class="flex items-center gap-1.5">
-                <button onclick="editarProfesorModal(${p.id})" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-lg transition flex items-center gap-1 shadow-2xs">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button onclick="editarProfesorModal(${p.id})" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-xl transition flex items-center gap-1 shadow-2xs cursor-pointer">
                   <i class="fa-solid fa-pen-to-square"></i> Modificar Datos
                 </button>
-                <button onclick="eliminarProfesorClick(${p.id})" class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold rounded-lg transition flex items-center gap-1 shadow-2xs">
+                <button onclick="eliminarProfesorClick(${p.id})" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold rounded-xl transition flex items-center gap-1 shadow-2xs cursor-pointer">
                   <i class="fa-solid fa-trash"></i> Baja
                 </button>
               </div>
@@ -3302,21 +3312,21 @@
     function renderAdminPromos() {
       const container = document.getElementById('gridAdminPromos');
       container.innerHTML = window.PKStore.promociones.map(p => `
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+        <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-3 shadow-xs">
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="px-2 py-0.5 bg-pk-purple text-white text-[10px] font-bold rounded uppercase">${p.tag}</span>
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+              <span class="px-2.5 py-1 bg-pk-purple text-white text-[10px] font-black rounded-md uppercase tracking-wider">${p.tag}</span>
               <span class="text-xs font-bold ${p.activa ? 'text-emerald-600' : 'text-slate-400'}">
                 ${p.activa ? '● Activa' : '○ Pausada'}
               </span>
             </div>
             <h4 class="text-sm font-black text-slate-900">${p.titulo}</h4>
-            <p class="text-xs text-slate-600 mt-1">${p.descripcion}</p>
-            <div class="mt-2 text-base font-black text-pk-purple">
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${p.descripcion}</p>
+            <div class="mt-2.5 text-base font-black text-pk-purple">
               $${(p.precio || 0).toLocaleString('es-AR')} <span class="text-xs font-normal text-slate-400">/mes</span>
             </div>
           </div>
-          <button onclick="togglePromoClick(${p.id})" class="px-3 py-1.5 ${p.activa ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} text-xs font-bold rounded-lg transition self-end">
+          <button onclick="togglePromoClick(${p.id})" class="px-3.5 py-2 ${p.activa ? 'bg-amber-100 hover:bg-amber-200 text-amber-900' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900'} text-xs font-bold rounded-xl transition self-start sm:self-end cursor-pointer">
             ${p.activa ? 'Pausar Publicación' : 'Activar Publicación'}
           </button>
         </div>
