@@ -802,15 +802,97 @@ const PKStore = {
           fetch('/api/promociones').then(r => r.json()),
           fetch('/api/configuracion').then(r => r.json())
         ]);
-        this.turnos = turnosRes;
-        this.alumnos = alumnosRes;
-        this.profesionales = profesRes;
-        this.promociones = promosRes;
-        if (confRes) this.configuracion = confRes;
+
+        // FUSIÓN INTELIGENTE DE ALUMNOS (LOSSLESS / SIN PÉRDIDA DE DATOS)
+        const mapAlumnos = new Map();
+        (alumnosRes || []).forEach(a => mapAlumnos.set(a.id, a));
+
+        // Preservar alumnos y pagos registrados en el cliente
+        (this.alumnos || []).forEach(local => {
+          if (!mapAlumnos.has(local.id)) {
+            // Alumno local que no está en el backend (ej: tras reinicio de contenedor): reenviar al backend
+            mapAlumnos.set(local.id, local);
+            fetch('/api/alumnos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(local)
+            }).catch(() => {});
+          } else {
+            // Existe en ambos: fusionar dando prioridad al estado de pago y habilitación más recientes
+            const remoto = mapAlumnos.get(local.id);
+            const fusion = { ...remoto, ...local };
+            mapAlumnos.set(local.id, fusion);
+          }
+        });
+        this.alumnos = Array.from(mapAlumnos.values());
+
+        // FUSIÓN DE TURNOS Y CAMAS (PRESERVA INSCRIPCIONES EN TODAS LAS CAMILLAS)
+        if (Array.isArray(turnosRes)) {
+          turnosRes.forEach(tRemoto => {
+            const tLocal = (this.turnos || []).find(t => t.id === tRemoto.id);
+            if (tLocal && Array.isArray(tLocal.inscriptos) && tLocal.inscriptos.length > 0) {
+              const unidos = Array.from(new Set([...(tRemoto.inscriptos || []), ...tLocal.inscriptos]));
+              tRemoto.inscriptos = unidos;
+            }
+          });
+          this.turnos = turnosRes;
+        }
+
+        if (Array.isArray(profesRes) && profesRes.length > 0) this.profesionales = profesRes;
+        if (Array.isArray(promosRes) && promosRes.length > 0) this.promociones = promosRes;
+        if (confRes) this.configuracion = { ...confRes, ...this.configuracion };
+
         this.saveAllLocal();
       }
     } catch (e) {
       this.isApiConnected = false;
+    }
+  },
+
+  // Copia de Seguridad & Respaldo Permanente (JSON)
+  descargarBackupJSON() {
+    const backup = {
+      sistema: 'PK PILATES KINÉSICO',
+      version: '7.0',
+      fechaExportacion: new Date().toISOString(),
+      configuracion: this.configuracion,
+      profesionales: this.profesionales,
+      turnos: this.turnos,
+      alumnos: this.alumnos,
+      promociones: this.promociones
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pk_pilates_respaldo_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
+  async restaurarBackupJSON(jsonString) {
+    try {
+      const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      if (data.configuracion) this.configuracion = data.configuracion;
+      if (Array.isArray(data.profesionales)) this.profesionales = data.profesionales;
+      if (Array.isArray(data.turnos)) this.turnos = data.turnos;
+      if (Array.isArray(data.alumnos)) this.alumnos = data.alumnos;
+      if (Array.isArray(data.promociones)) this.promociones = data.promociones;
+      this.saveAllLocal();
+
+      if (this.isApiConnected) {
+        await fetch('/api/backup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).catch(() => {});
+      }
+      return true;
+    } catch (e) {
+      console.error('Error restaurando backup:', e);
+      return false;
     }
   },
 

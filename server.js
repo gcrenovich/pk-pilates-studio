@@ -248,6 +248,17 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, whatsappService.getLogs());
   }
 
+  // 6. COPIA DE SEGURIDAD & RESPALDO PERMANENTE (JSON BACKUP / RESTORE)
+  if (pathname === '/api/backup' && method === 'GET') {
+    return sendJSON(res, 200, db.obtenerRespaldoCompleto());
+  }
+
+  if (pathname === '/api/backup' && method === 'POST') {
+    const body = await getRequestBody(req);
+    const ok = db.importarRespaldo(body);
+    return sendJSON(res, 200, { ok, data: db.obtenerRespaldoCompleto() });
+  }
+
   // ==========================================
   // SERVIR ARCHIVOS ESTÁTICOS DE FRONTEND
   // ==========================================

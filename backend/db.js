@@ -759,6 +759,30 @@ class Database {
     this.save();
     return { ok: true, origen, destino };
   }
+
+  // Backup & Respaldo Permanente
+  obtenerRespaldoCompleto() {
+    return this.data;
+  }
+
+  importarRespaldo(backupData) {
+    if (!backupData) return false;
+    if (backupData.configuracion) Object.assign(this.data.configuracion, backupData.configuracion);
+    if (Array.isArray(backupData.profesionales) && backupData.profesionales.length > 0) {
+      this.data.profesionales = backupData.profesionales;
+    }
+    if (Array.isArray(backupData.turnos) && backupData.turnos.length > 0) {
+      this.data.turnos = backupData.turnos;
+    }
+    if (Array.isArray(backupData.alumnos) && backupData.alumnos.length > 0) {
+      this.data.alumnos = backupData.alumnos;
+    }
+    if (Array.isArray(backupData.promociones) && backupData.promociones.length > 0) {
+      this.data.promociones = backupData.promociones;
+    }
+    this.save();
+    return true;
+  }
 }
 
 module.exports = new Database();

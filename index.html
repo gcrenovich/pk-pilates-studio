@@ -481,15 +481,24 @@
             </div>
           </div>
 
-          <!-- Acciones Rápidas de Seguridad y Cierre de Sesión -->
-          <div class="flex items-center gap-2 self-start sm:self-center">
-            <button onclick="cambiarPinSeguridadPrompt()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5 shadow-2xs" title="Modificar PIN o clave de acceso al panel">
-              <i class="fa-solid fa-key text-pk-purple"></i>
-              <span>Cambiar PIN</span>
+          <!-- Acciones Rápidas de Seguridad, Respaldo y Cierre de Sesión -->
+          <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <button onclick="descargarCopiaSeguridadClick()" class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-pk-purple font-bold text-xs rounded-xl border border-purple-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Descargar copia de seguridad con todos los alumnos, turnos y pagos en JSON">
+              <i class="fa-solid fa-download"></i>
+              <span>Respaldar Datos</span>
             </button>
-            <button onclick="cerrarSesionAdmin()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1.5 shadow-2xs" title="Cerrar sesión y bloquear panel bajo clave">
+            <button onclick="document.getElementById('inputRestaurarBackup').click()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Restaurar copia de seguridad desde un archivo JSON">
+              <i class="fa-solid fa-upload"></i>
+              <span>Restaurar</span>
+            </button>
+            <input type="file" id="inputRestaurarBackup" accept=".json" onchange="restaurarCopiaSeguridadSeleccionada(event)" class="hidden">
+            <button onclick="cambiarPinSeguridadPrompt()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Modificar PIN o clave de acceso al panel">
+              <i class="fa-solid fa-key text-pk-purple"></i>
+              <span class="hidden md:inline">Cambiar PIN</span>
+            </button>
+            <button onclick="cerrarSesionAdmin()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Cerrar sesión y bloquear panel bajo clave">
               <i class="fa-solid fa-lock"></i>
-              <span>Bloquear Panel</span>
+              <span class="hidden md:inline">Bloquear</span>
             </button>
           </div>
         </div>
@@ -1440,11 +1449,8 @@
     let _selectedTurnoIdDetalle = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Limpiar datos viejos de caché local para cargar los datos oficiales reales con Padrón Central (v7)
-      if (localStorage.getItem('pk_version_oficial') !== '7.0') {
-        localStorage.clear();
-        localStorage.setItem('pk_version_oficial', '7.0');
-      }
+      // Registrar versión de sincronización preservando todos los datos de alumnos, turnos y pagos
+      localStorage.setItem('pk_version_oficial', '7.0');
 
       await window.PKStore.init();
       actualizarBadgeStatus();
@@ -1464,6 +1470,31 @@
         });
       }
     });
+
+    // Funciones de Copia de Seguridad & Respaldo Permanente
+    function descargarCopiaSeguridadClick() {
+      window.PKStore.descargarBackupJSON();
+    }
+
+    async function restaurarCopiaSeguridadSeleccionada(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (confirm(`¿Confirmas restaurar la información desde "${file.name}"? Se actualizarán todos los alumnos, turnos y pagos.`)) {
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          const ok = await window.PKStore.restaurarBackupJSON(evt.target.result);
+          if (ok) {
+            alert('¡Copia de seguridad restaurada correctamente!');
+            renderAdminDashboard();
+            onCambioProfeAlumno();
+          } else {
+            alert('Error al leer el archivo de respaldo. Asegúrate de que sea un archivo JSON válido.');
+          }
+        };
+        reader.readAsText(file);
+      }
+      e.target.value = '';
+    }
 
     function actualizarMontoPorObraSocial() {
       const os = document.getElementById('aluObraSocial')?.value;
