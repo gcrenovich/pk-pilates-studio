@@ -1,0 +1,24 @@
+# PILATES KINÉSICO - Cline Rules
+
+## Roles y Responsabilidades
+- **Ingeniero de Sistemas / Lead Architect**: Antigravity
+- **Ingeniero de Software / Lead Developer**: Cline
+- **Objetivo**: Desarrollar la plataforma web responsive para "PILATES KINÉSICO", permitiendo a los alumnos auto-reservar turnos con cupos en tiempo real, consultar tarifas/promos, abonar mediante bancos digitales (Alias/CBU/MP), y a los kinesiólogos/profesores gestionar cupos, alumnos, cobranzas atrasadas y promociones.
+
+## Convenciones de Código y Arquitectura
+1. **Mobile-First**: La interfaz debe estar 100% optimizada para dispositivos móviles (Android & iOS) y adaptarse elegantemente a escritorios y tablets.
+2. **Identidad Visual**:
+   - Primario: Violeta / Púrpura PK (`#7A1E7B`, `#86198F`)
+   - Secundario: Turquesa / Cian (`#00A8B5`, `#06B6D4`)
+   - Acento / Texto: Azul Marino Profundo (`#0F172A`, `#1E293B`)
+   - Fondos: Blanco limpio y Gris neutro (`#F8FAFC`)
+3. **Clean Architecture & Estado Centralizado**:
+   - Toda la lógica de datos (turnos, cupos, pagos, alumnos, profesores y promociones) debe estar desacoplada de la vista para facilitar la migración a backend cloud (Supabase / PostgreSQL / Firebase) en la Fase 2.
+4. **WhatsApp Bot First**:
+   - Cada acción de reserva o consulta debe estar lista para enlazarse con WhatsApp Cloud API / Webhooks.
+5. **Reglas Fundamentales de Negocio**:
+   - Capacidad oficial: **6 Camas Reformer** por clase (31 turnos oficiales: Gustavo Moyano L-V mañana 08/09 y siesta 15/16/17; Agustina Maidana M-J 18/19/20).
+   - Vista Alumno: Formulario directo + Combo Box de Kinesiólogo + Checkboxes semanales agrupados por día + WhatsApp.
+   - Vista ABM: Grilla semanal SigueFit (5 columnas responsive con scroll horizontal), clic abre ventana modal de alumnos por cama, y ajuste de camas con consenso/reubicación si hay alumnos excedentes.
+6. **Autonomía y Documentación**:
+   - Mantener siempre actualizados los archivos en `cline_docs/` al realizar cambios estructurales.

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pk-pilates-studio
+    env: node
+    plan: free
+    buildCommand: ""
+    startCommand: "npm start"
+    envVars:
+      - key: PORT
+        value: 3000

@@ -1,0 +1,20 @@
+{
+  "name": "pk-pilates-studio",
+  "version": "1.0.0",
+  "description": "PILATES KINÉSICO - Sistema Web, Gestión de Camas Reformer y Turnero WhatsApp",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js app.js backend/db.js backend/whatsappService.js"
+  },
+  "keywords": [
+    "pilates",
+    "kinesiologia",
+    "reformer",
+    "turnos",
+    "whatsapp"
+  ],
+  "author": "Antigravity & Cline",
+  "license": "ISC",
+  "type": "commonjs"
+}

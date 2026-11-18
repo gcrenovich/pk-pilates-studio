@@ -1,0 +1,3382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PK Estudio de Pilates Kinésico | Contrología & Kinesiología</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pk: {
+              purple: '#7A1E7B',
+              purpleDark: '#5c145d',
+              purpleLight: '#f3e8ff',
+              teal: '#00A8B5',
+              tealDark: '#08838e',
+              tealLight: '#e0f7fa',
+              navy: '#0F172A',
+              slate: '#1E293B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .gradient-pk {
+      background: linear-gradient(135deg, #7A1E7B 0%, #00A8B5 100%);
+    }
+    .mobile-frame {
+      max-width: 440px;
+      margin: 0 auto;
+      border: 12px solid #1e293b;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      min-height: 850px;
+      overflow: hidden;
+      background: #f8fafc;
+      position: relative;
+    }
+
+    /* Grilla de turnos semanal SigueFit */
+    .grid-semanal-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.5rem;
+    }
+    .columna-dia-card {
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen">
+
+  <!-- ========================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+  <!-- ========================================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Identidad y Logo -->
+        <div class="flex items-center space-x-3">
+          <img src="./logo.jpg" alt="PK Pilates" class="h-11 w-auto rounded-lg object-contain shadow-xs border border-purple-100">
+          <div>
+            <span class="text-lg font-black tracking-tight text-pk-purple flex items-center gap-1">
+              PK <span class="text-pk-teal font-extrabold text-sm uppercase tracking-wider">Pilates Kinésico</span>
+            </span>
+            <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Contrología Corporal & Kinesiología</p>
+          </div>
+        </div>
+
+        <!-- Selector de Vista y Herramientas -->
+        <div class="flex items-center space-x-2">
+          
+          <!-- Estado de Conexión API / Local -->
+          <span id="badgeApiStatus" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="txtApiStatus">Sincronizado</span>
+          </span>
+
+          <!-- Botón de Simulación de Pantalla Móvil -->
+          <button id="btnToggleMobileFrame" onclick="toggleMobileView()" 
+            class="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50 transition">
+            <i class="fa-solid fa-mobile-screen text-pk-purple"></i>
+            <span id="txtMobileToggle">Simular Celular</span>
+          </button>
+
+          <!-- Toggle de Roles y Acceso Seguro -->
+          <div class="flex items-center gap-1.5">
+            <div class="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
+              <button id="btnRoleAlumno" onclick="setRole('alumno')" 
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-pk-purple text-white shadow-xs">
+                <i class="fa-solid fa-user"></i>
+                <span>Alumnos</span>
+              </button>
+              <button id="btnRoleProfe" onclick="setRole('profesor')" 
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple">
+                <i class="fa-solid fa-lock text-[11px] text-pk-purple"></i>
+                <span>Panel de Control (ABM)</span>
+              </button>
+            </div>
+            <button id="btnNavBloquear" onclick="cerrarSesionAdmin()" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold transition items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 shadow-2xs cursor-pointer" title="Cerrar sesión y bloquear panel bajo clave">
+              <i class="fa-solid fa-lock text-xs"></i>
+              <span class="hidden md:inline">Bloquear</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DINÁMICO -->
+  <main id="appContainer" class="py-6 px-3 sm:px-6 transition-all duration-300">
+    
+    <!-- ========================================== -->
+    <!-- 📱 VISTA 1: ALUMNOS / CLIENTES (MOBILE FIRST) -->
+    <!-- ========================================== -->
+    <div id="viewAlumno" class="max-w-4xl mx-auto space-y-6">
+
+      <!-- Banner de Bienvenida Oficial con Propaganda del Estudio -->
+      <div class="gradient-pk rounded-2xl p-5 sm:p-6 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10">
+          <span class="inline-block px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide uppercase mb-2">
+            Salud, Rehabilitación & Movimiento
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-black leading-tight">
+            Clases de PILATES KINÉSICO
+          </h1>
+          <p class="text-purple-100 text-xs sm:text-sm mt-1 max-w-xl font-medium">
+            Clases en camillas Reformer a cargo de Licenciados en Kinesiología y Fisioterapia. <br>
+            <b class="text-white">💚 Tu bienestar, en manos de profesionales de la salud.</b>
+          </p>
+
+          <div class="flex flex-wrap items-center gap-3 mt-4">
+            <a href="#seccionTurnos" class="bg-white text-pk-purple font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md hover:bg-purple-50 transition flex items-center gap-2">
+              <i class="fa-regular fa-calendar-check"></i>
+              Ver Horarios y Camas Libres
+            </a>
+            <a href="#seccionAranceles" class="bg-pk-teal text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md hover:bg-pk-tealDark transition flex items-center gap-2">
+              <i class="fa-solid fa-tag"></i>
+              Aranceles Mensuales
+            </a>
+          </div>
+        </div>
+        <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+      </div>
+
+      <!-- SECCIÓN: BENEFICIOS DEL PILATES KINÉSICO (OFICIAL) -->
+      <section class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-8 h-8 rounded-full bg-purple-100 text-pk-purple flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-heart-pulse"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">Beneficios del Pilates Kinésico</h3>
+            <p class="text-[11px] text-slate-500">Especializados en el movimiento y la rehabilitación</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span><b>Mejorar la movilidad</b> y flexibilidad articular.</span>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span><b>Fortalecer</b> la musculatura profunda y postural.</span>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span><b>Mejorar la postura</b> y alineación de columna.</span>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span><b>Prevenir lesiones</b> y dolores lumbares/cervicales.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: ARANCELES MENSUALES (PARTICULAR & INSTITUTO DE SEGURO) -->
+      <section id="seccionAranceles" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+        <div class="mb-4">
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-file-invoice-dollar text-pk-teal"></i>
+            Aranceles Mensuales
+          </h2>
+          <p class="text-xs text-slate-500">Tarifas vigentes para clases de Pilates Kinésico en camillas Reformer.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Particular -->
+          <div class="p-4 rounded-xl border border-purple-200 bg-gradient-to-br from-white to-purple-50/40 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2.5 py-0.5 bg-pk-purple text-white rounded text-[10px] font-extrabold uppercase">Plan Particular</span>
+                <span class="text-xs font-bold text-slate-500">2 Clases Semanales</span>
+              </div>
+              <h3 class="text-base font-black text-slate-900 mb-1">Particular</h3>
+              <p class="text-xs text-slate-600 mb-3">
+                Incluye 2 clases semanales personalizadas con seguimiento a cargo de Kinesiólogos y Fisioterapeutas.
+              </p>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-purple-100">
+              <span class="text-xl font-black text-pk-purple">$50.000 <span class="text-xs text-slate-500 font-normal">/mes</span></span>
+              <a href="#seccionTurnos" class="px-3.5 py-1.5 bg-pk-purple text-white text-xs font-bold rounded-lg hover:bg-pk-purpleDark transition">
+                Anotarme
+              </a>
+            </div>
+          </div>
+
+          <!-- Obra Social Instituto de Seguro -->
+          <div class="p-4 rounded-xl border border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2.5 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-extrabold uppercase">Convenio Especial</span>
+                <span class="text-xs font-bold text-emerald-700">Presentando Carnet</span>
+              </div>
+              <h3 class="text-base font-black text-slate-900 mb-1">Obra Social Instituto de Seguro</h3>
+              <p class="text-xs text-slate-600 mb-3">
+                $35.000 mensuales presentando el carnet correspondiente de la obra social. Incluye 2 clases semanales.
+              </p>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-emerald-100">
+              <span class="text-xl font-black text-emerald-700">$35.000 <span class="text-xs text-slate-500 font-normal">/mes</span></span>
+              <a href="#seccionTurnos" class="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition">
+                Anotarme con Carnet
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 📝 PANEL DE INSCRIPCIÓN Y RESERVA DE ALUMNOS -->
+      <!-- ========================================== -->
+      <section id="seccionInscripcionAlumno" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-6">
+        
+        <!-- Encabezado del Formulario -->
+        <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 bg-purple-100 text-pk-purple text-[10px] font-black uppercase rounded-md tracking-wider">Turnos & Camillas Reformer</span>
+              <span class="text-xs text-slate-400 font-medium hidden sm:inline">• Atención Personalizada</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900 mt-1 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-user text-pk-purple"></i>
+              Inscripción de Alumno & Reserva de Clases
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Ingresá tus datos, seleccioná a tu kinesiólogo/a y marcá con checkboxes los días y horarios en los que vas a asistir.</p>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-pk-purple text-xs font-bold rounded-full border border-purple-200 self-start sm:self-auto">
+            <i class="fa-solid fa-bed text-pk-teal"></i> 6 Camas Reformer por clase
+          </span>
+        </div>
+
+        <form id="formInscripcionAlumno" onsubmit="confirmarInscripcionAlumnoSubmit(event)" class="space-y-6">
+
+          <!-- PASO 1: DATOS PERSONALES -->
+          <div class="space-y-3">
+            <h3 class="text-xs font-black uppercase tracking-wider text-pk-purple flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-pk-purple text-white text-[11px] flex items-center justify-center font-bold">1</span>
+              Tus Datos Personales & Plan
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nombre y Apellido <span class="text-rose-500">*</span></label>
+                <input type="text" id="alumnoReservaNombre" required placeholder="Ej: Juan Pérez" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp / Teléfono <span class="text-rose-500">*</span></label>
+                <input type="tel" id="alumnoReservaTelefono" required placeholder="Ej: 3884123456" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Plan / Modalidad de Pago:</label>
+                <select id="alumnoReservaPlan" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+                  <option value="Abono Particular (2 clases/sem) - $50.000">Abono Particular - $50.000 mensuales (2 clases/sem)</option>
+                  <option value="Obra Social Instituto de Seguro (2 clases/sem) - $35.000 adicional">Obra Social Instituto de Seguro - $35.000 adicional (2 clases/sem)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Patología / Motivo de consulta (opcional):</label>
+                <input type="text" id="alumnoReservaPatologia" placeholder="Ej: Cervicalgia, hernia lumbar, postural..." class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <input type="checkbox" id="alumnoReservaSenior" class="w-4 h-4 text-pk-purple rounded border-slate-300 focus:ring-pk-purple cursor-pointer">
+              <label for="alumnoReservaSenior" class="text-xs font-semibold text-slate-700 cursor-pointer flex items-center gap-1.5">
+                <i class="fa-solid fa-person-cane text-pk-teal"></i> Soy Adulto Mayor (60+ años) - adaptación de baja intensidad
+              </label>
+            </div>
+          </div>
+
+          <!-- PASO 2: COMBO BOX DE PROFESOR -->
+          <div class="space-y-3 pt-4 border-t border-slate-200">
+            <h3 class="text-xs font-black uppercase tracking-wider text-pk-purple flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-pk-purple text-white text-[11px] flex items-center justify-center font-bold">2</span>
+              Elegí tu Kinesiólogo / Profesional (Combo Box)
+            </h3>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Profesional a cargo:</label>
+              <select id="alumnoReservaProfe" onchange="onCambioProfeAlumno()" class="w-full text-xs font-bold bg-purple-50/50 border-2 border-purple-200 rounded-xl px-3.5 py-3 text-slate-900 focus:outline-none focus:border-pk-purple focus:ring-2 focus:ring-pk-purple">
+                <!-- Dinámico -->
+              </select>
+            </div>
+
+            <!-- Ficha informativa del profesional seleccionado -->
+            <div id="fichaProfeSeleccionado" class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex items-center justify-between text-xs">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+          <!-- PASO 3: CHECKBOXES CON HORARIOS SEMANALES -->
+          <div class="space-y-3 pt-4 border-t border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <h3 class="text-xs font-black uppercase tracking-wider text-pk-purple flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-pk-purple text-white text-[11px] flex items-center justify-center font-bold">3</span>
+                Seleccioná tus Horarios Semanales (Checkboxes)
+              </h3>
+              <span id="badgeClasesContador" class="text-xs font-bold text-slate-500">
+                0 horarios seleccionados
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">Marcá las casillas de los turnos en los que vas a concurrir semanalmente (por ejemplo, 2 clases semanales según tu plan):</p>
+
+            <!-- Contenedor dinámico de checkboxes por día -->
+            <div id="contenedorCheckboxesHorarios" class="space-y-3">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+          <!-- RESUMEN Y ENVÍO POR WHATSAPP -->
+          <div class="pt-4 border-t border-slate-200 space-y-3">
+            <div id="resumenTurnosSeleccionadosBox" class="bg-purple-50 p-3.5 rounded-xl border border-purple-200 hidden">
+              <span class="text-[11px] font-bold uppercase text-pk-purple block mb-1">Resumen de Clases Seleccionadas:</span>
+              <p id="txtResumenTurnosSeleccionados" class="text-xs font-extrabold text-slate-800"></p>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 px-4 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-brands fa-whatsapp text-xl"></i>
+              <span>Confirmar Reserva de Camas y Notificar por WhatsApp</span>
+            </button>
+            <p class="text-[11px] text-center text-slate-400">Al confirmar, se reservará tu lugar en las camillas Reformer y se abrirá WhatsApp con el mensaje pre-armado hacia tu kinesiólogo.</p>
+          </div>
+
+        </form>
+
+      </section>
+
+      <!-- SECCIÓN: PAGO Y TRANSFERENCIA A BANCOS DIGITALES -->
+      <section id="seccionPago" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+        <div class="mb-4">
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-money-bill-transfer text-emerald-600"></i>
+            Abonar Turno o Mensualidad a tu Profesional
+          </h2>
+          <p class="text-xs text-slate-500">Transferencia directa sin intermediarios a la cuenta del kinesiólogo/a que te atiende.</p>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-700 mb-1">Selecciona el profesional a quien vas a transferir:</label>
+          <select id="selectProfeCobro" onchange="actualizarDatosCobroDisplay()" class="w-full text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            <!-- Dinámico -->
+          </select>
+        </div>
+
+        <div id="datosCobroCard" class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="text-xs text-slate-500">Entidad / Billetera:</span>
+            <span id="txtBancoNombre" class="text-xs font-bold text-slate-800">Banco Macro</span>
+          </div>
+
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="text-xs text-slate-500">Titular y CUIT:</span>
+            <span id="txtTitularCuit" class="text-xs font-bold text-slate-800">Gustavo Moyano (20-31849204-7)</span>
+          </div>
+
+          <!-- Alias con botón de copiado -->
+          <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-purple-100">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-pk-purple block">Alias para Transferir:</span>
+              <span id="txtAliasValue" class="text-sm font-extrabold text-slate-900">gustavo.moyano.pk</span>
+            </div>
+            <button onclick="copiarTexto('txtAliasValue', 'btnCopiarAlias')" id="btnCopiarAlias" class="px-3 py-1.5 bg-purple-50 hover:bg-pk-purple hover:text-white text-pk-purple border border-purple-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copiar Alias</span>
+            </button>
+          </div>
+
+          <!-- CBU / CVU con botón de copiado -->
+          <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-500 block">CVU / CBU:</span>
+              <span id="txtCbuValue" class="text-xs font-mono font-bold text-slate-800">2850590940090418135201</span>
+            </div>
+            <button onclick="copiarTexto('txtCbuValue', 'btnCopiarCbu')" id="btnCopiarCbu" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-800 hover:text-white text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <button onclick="enviarComprobantePorWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            Confirmar Reserva y Enviar Comprobante por WhatsApp
+          </button>
+          <p class="text-[11px] text-center text-slate-400 mt-2">Abre WhatsApp con el mensaje pre-armado y los datos de tu profesional.</p>
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 👩‍⚕️ VISTA 2: PANEL DE CONTROL Y ABM COMPLETO -->
+    <!-- ========================================== -->
+    <div id="viewProfesor" class="max-w-6xl mx-auto space-y-6 hidden">
+
+      <!-- Header del Panel -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold text-pk-purple uppercase tracking-wider">Módulo de Administración & Gestión</span>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900">
+            Panel de Profesores & Control de Camas Reformer
+          </h1>
+          <p class="text-xs text-slate-500">Gestión de Lic. Gustavo Moyano y Lic. Agustina Maidana, Alumnos, Horarios y Camas.</p>
+        </div>
+
+        <!-- Controles de Capacidad y Seguridad en Cabecera -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Control de Capacidad de Camas del Estudio con botones + y - -->
+          <div class="flex items-center gap-3 bg-purple-50 p-3 rounded-2xl border-2 border-purple-200 shadow-xs">
+            <div class="w-10 h-10 rounded-xl bg-pk-purple text-white flex items-center justify-center font-bold text-lg shadow-2xs">
+              <i class="fa-solid fa-bed"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-black uppercase text-pk-purple tracking-wider block">Camas Reformer Estudio:</span>
+              <div class="flex items-center gap-1.5 mt-1">
+                <button type="button" onclick="ajustarCamasPaso(-1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-700 text-slate-800 border-2 border-purple-200 font-black text-base flex items-center justify-center transition shadow-2xs cursor-pointer" title="Quitar 1 Cama del estudio">
+                  <i class="fa-solid fa-minus text-xs"></i>
+                </button>
+                <input type="number" id="inputCamasGlobal" min="1" max="20" class="w-14 text-center text-sm font-black bg-white border-2 border-purple-300 rounded-lg py-1 text-slate-900 focus:outline-none focus:border-pk-purple shadow-2xs" value="6">
+                <button type="button" onclick="ajustarCamasPaso(1)" class="w-8 h-8 rounded-lg bg-white hover:bg-emerald-50 hover:text-emerald-700 text-slate-800 border-2 border-purple-200 font-black text-base flex items-center justify-center transition shadow-2xs cursor-pointer" title="Agregar 1 Cama al estudio">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                </button>
+                <button onclick="guardarCamasGlobales()" class="ml-1 px-3 py-1.5 bg-pk-purple hover:bg-pk-purpleDark text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-check"></i>
+                  <span>Aplicar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones Rápidas de Seguridad y Cierre de Sesión -->
+          <div class="flex items-center gap-2 self-start sm:self-center">
+            <button onclick="cambiarPinSeguridadPrompt()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-1.5 shadow-2xs" title="Modificar PIN o clave de acceso al panel">
+              <i class="fa-solid fa-key text-pk-purple"></i>
+              <span>Cambiar PIN</span>
+            </button>
+            <button onclick="cerrarSesionAdmin()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1.5 shadow-2xs" title="Cerrar sesión y bloquear panel bajo clave">
+              <i class="fa-solid fa-lock"></i>
+              <span>Bloquear Panel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Alumnos Totales</span>
+          <p id="kpiAlumnosTotales" class="text-2xl font-black text-slate-900 mt-1">0</p>
+          <span class="text-[10px] text-slate-500 font-semibold">Pilates Kinésico</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Profesores / Lic.</span>
+          <p id="kpiProfesTotales" class="text-2xl font-black text-pk-purple mt-1">0</p>
+          <span class="text-[10px] text-pk-purple font-semibold">Kinesiólogos y Fisioterapeutas</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Alumnos al Día</span>
+          <p id="kpiAlumnosAlDia" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+          <span class="text-[10px] text-emerald-700 font-semibold">Sin deuda mensual</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-rose-200 bg-rose-50/30 shadow-xs">
+          <span class="text-[11px] font-bold text-rose-700 uppercase">Atrasados / Deuda</span>
+          <p id="kpiAlumnosAtrasados" class="text-2xl font-black text-rose-600 mt-1">0</p>
+          <span class="text-[10px] text-rose-700 font-semibold">Pendientes de pago</span>
+        </div>
+      </div>
+
+      <!-- PESTAÑAS PRINCIPALES DEL PANEL (ABM) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        
+        <div class="flex border-b border-slate-200 bg-slate-50/50 overflow-x-auto">
+          <button onclick="setTabProfesor('alumnos')" id="tabBtnAlumnos" class="px-5 py-3 text-xs font-bold border-b-2 border-pk-purple text-pk-purple bg-white flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-users"></i>
+            ABM Alumnos & Cobranzas
+          </button>
+          <button onclick="setTabProfesor('turnos')" id="tabBtnTurnos" class="px-5 py-3 text-xs font-bold border-b-2 border-transparent text-slate-600 hover:text-pk-purple flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-calendar-check"></i>
+            ABM Horarios & Camas
+          </button>
+          <button onclick="setTabProfesor('profesores')" id="tabBtnProfesores" class="px-5 py-3 text-xs font-bold border-b-2 border-transparent text-slate-600 hover:text-pk-purple flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-user-doctor"></i>
+            ABM Profesores / Licenciados
+          </button>
+          <button onclick="setTabProfesor('promociones')" id="tabBtnPromos" class="px-5 py-3 text-xs font-bold border-b-2 border-transparent text-slate-600 hover:text-pk-purple flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-bullhorn"></i>
+            Aranceles & Convenios
+          </button>
+        </div>
+
+        <div class="p-5">
+
+          <!-- PESTAÑA 1: ABM ALUMNOS & COBRANZAS (PADRÓN CENTRAL DE ALUMNOS) -->
+          <div id="subTabAlumnos" class="space-y-4">
+            
+            <!-- Encabezado de la Sección -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-purple-100 text-pk-purple text-[10px] font-black uppercase rounded-md tracking-wider">Base de Datos & Gestión Clínica</span>
+                  <span class="text-xs text-slate-400 font-medium hidden sm:inline">• Padrón Central</span>
+                </div>
+                <h3 class="text-base font-black text-slate-900 mt-0.5">Padrón Central de Alumnos & Control de Habilitaciones</h3>
+                <p class="text-xs text-slate-500">Administra altas, estado de habilitación médica, patologías, turnos asignados a camas reformer y cobranzas mensuales.</p>
+              </div>
+
+              <button onclick="abrirModalAlumno()" class="px-4 py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer self-start md:self-auto shrink-0">
+                <i class="fa-solid fa-user-plus"></i>
+                Registrar Nuevo Alumno (Alta)
+              </button>
+            </div>
+
+            <!-- Barra de Búsqueda en Vivo & Filtros Rápidos -->
+            <div class="bg-slate-50/80 p-3 sm:p-4 rounded-2xl border border-slate-200 space-y-3">
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <!-- Buscador en tiempo real -->
+                <div class="relative flex-1">
+                  <input type="text" id="inputBuscarAlumno" oninput="filtrarAlumnosPadrón()" placeholder="🔍 Buscar por nombre, DNI, WhatsApp, patología, obra social o kinesiólogo..." class="w-full text-xs bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 pl-9 pr-8 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pk-purple shadow-2xs">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                  <button type="button" onclick="limpiarBusquedaAlumno()" id="btnLimpiarBusquedaAlumno" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+
+                <!-- Filtro por Kinesiólogo / Profesional -->
+                <div class="sm:w-56 shrink-0">
+                  <select id="selectFiltroProfeAlumno" onchange="filtrarAlumnosPadrón()" class="w-full text-xs bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-pk-purple shadow-2xs">
+                    <option value="todos">Todos los Profesionales</option>
+                    <option value="Lic. Gustavo Moyano">Lic. Gustavo Moyano</option>
+                    <option value="Lic. Agustina Maidana">Lic. Agustina Maidana</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Pestañas de Filtro de Estado & Habilitación -->
+              <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 border-t border-slate-200/70">
+                <button onclick="setFiltroPadron('todos')" id="btnFiltro_todos" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 text-white flex items-center gap-1.5 transition">
+                  <span>Todos</span>
+                  <span id="badgeCount_todos" class="px-1.5 py-0.2 bg-white/20 text-white rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setFiltroPadron('habilitados')" id="btnFiltro_habilitados" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-emerald-100 hover:text-emerald-800 flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i>
+                  <span>Habilitados</span>
+                  <span id="badgeCount_habilitados" class="px-1.5 py-0.2 bg-emerald-200 text-emerald-900 rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setFiltroPadron('inhabilitados')" id="btnFiltro_inhabilitados" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-amber-100 hover:text-amber-800 flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-circle-pause text-amber-600 text-[10px]"></i>
+                  <span>Inhabilitados / En Pausa</span>
+                  <span id="badgeCount_inhabilitados" class="px-1.5 py-0.2 bg-amber-200 text-amber-900 rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setFiltroPadron('al_dia')" id="btnFiltro_al_dia" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-emerald-100 hover:text-emerald-800 flex items-center gap-1.5 transition">
+                  <span>Al Día</span>
+                  <span id="badgeCount_al_dia" class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setFiltroPadron('por_vencer')" id="btnFiltro_por_vencer" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-amber-100 hover:text-amber-800 flex items-center gap-1.5 transition">
+                  <span>Por Vencer</span>
+                  <span id="badgeCount_por_vencer" class="px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setFiltroPadron('atrasado')" id="btnFiltro_atrasado" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-1.5 transition">
+                  <span>Con Deuda</span>
+                  <span id="badgeCount_atrasado" class="px-1.5 py-0.2 bg-rose-100 text-rose-800 rounded-full text-[10px]">0</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor del Padrón: Tabla (Desktop/Tablet) y Tarjetas (Móvil) -->
+            <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+              
+              <!-- Vista Tabla para Pantallas Medianas y Grandes -->
+              <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[900px]">
+                  <thead class="bg-slate-50 text-slate-600 font-black uppercase text-[10px] tracking-wider border-b border-slate-200">
+                    <tr>
+                      <th class="p-3.5">Alumno & DNI</th>
+                      <th class="p-3.5">Habilitación</th>
+                      <th class="p-3.5">Ficha Kinésica / Patología</th>
+                      <th class="p-3.5">Plan & Obra Social</th>
+                      <th class="p-3.5">Turnos Semanales</th>
+                      <th class="p-3.5">Arancel & Estado</th>
+                      <th class="p-3.5 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyAlumnos" class="divide-y divide-slate-100">
+                    <!-- Dinámico -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Vista Tarjetas Móviles (< 768px) -->
+              <div id="cardsAlumnosMobile" class="md:hidden divide-y divide-slate-200 p-2 space-y-3">
+                <!-- Dinámico en móvil -->
+              </div>
+
+              <!-- Estado Vacío cuando no hay resultados de búsqueda -->
+              <div id="alumnosEmptyState" class="hidden py-12 text-center space-y-3">
+                <div class="w-12 h-12 rounded-full bg-purple-50 text-pk-purple flex items-center justify-center mx-auto text-lg">
+                  <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <h4 class="text-sm font-black text-slate-800">No se encontraron alumnos</h4>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto">No hay ningún alumno que coincida con los términos de búsqueda o filtros seleccionados.</p>
+                <button onclick="limpiarBusquedaAlumno()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">
+                  Limpiar búsqueda
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- PESTAÑA 2: ABM HORARIOS & CAMAS REFORMER (GRILLA ESTILO SIGUEFIT) -->
+          <div id="subTabTurnos" class="space-y-4 hidden">
+            <!-- Header de la sección con acciones y toggle de vista -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-purple-100 text-pk-purple text-[10px] font-black uppercase rounded-md tracking-wider">Agenda Semanal & Ocupación</span>
+                  <span class="text-xs text-slate-400 font-medium hidden sm:inline">• Gestión en Vivo</span>
+                </div>
+                <h3 class="text-base font-black text-slate-900 mt-0.5">Grilla Semanal de Clases & Camas Reformer</h3>
+                <p class="text-xs text-slate-500">Toca cualquier turno en la columna de su día para ver los alumnos designados cama por cama, asignar o liberar cupos.</p>
+              </div>
+
+              <!-- Acciones y Selector de Modo -->
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Toggle Vista Grilla vs Vista Lista -->
+                <div class="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
+                  <button type="button" onclick="setAdminTurnosView('grilla')" id="btnViewAdminGrilla" class="px-3 py-1.5 text-xs font-bold rounded-lg transition flex items-center gap-1.5 bg-white text-pk-purple shadow-xs">
+                    <i class="fa-solid fa-calendar-week"></i>
+                    <span>Grilla Semanal</span>
+                  </button>
+                  <button type="button" onclick="setAdminTurnosView('lista')" id="btnViewAdminLista" class="px-3 py-1.5 text-xs font-bold rounded-lg transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Lista ABM</span>
+                  </button>
+                </div>
+
+                <button onclick="abrirModalTurno()" class="px-3.5 py-2 bg-pk-teal hover:bg-pk-tealDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Nuevo Horario (Alta)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filtros de la Grilla ABM (Profesionales y Días) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Filtrar por Profesional / Kinesiólogo:</label>
+                <select id="selectFiltroProfeAdmin" onchange="renderAdminTurnos()" class="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+                  <option value="todos">Todos los profesionales</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Filtrar por Día:</label>
+                <select id="selectFiltroDiaAdmin" onchange="onSelectFiltroDiaAdminChange(this.value)" class="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+                  <option value="todos">Toda la Semana (Lunes a Viernes)</option>
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2 lg:col-span-1 flex items-end">
+                <div class="flex items-center justify-between w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs">
+                  <span class="text-slate-600 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-bed text-pk-purple"></i> Capacidad:
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="ajustarCamasPaso(-1)" class="w-6 h-6 rounded-md bg-slate-100 hover:bg-rose-100 hover:text-rose-700 text-slate-800 font-black text-xs flex items-center justify-center transition border border-slate-200 cursor-pointer" title="Quitar 1 Cama del estudio">
+                      <i class="fa-solid fa-minus text-[10px]"></i>
+                    </button>
+                    <span id="lblCamasEstudioAdmin" class="font-black text-pk-purple px-1">6 Camas</span>
+                    <button type="button" onclick="ajustarCamasPaso(1)" class="w-6 h-6 rounded-md bg-slate-100 hover:bg-emerald-100 hover:text-emerald-700 text-slate-800 font-black text-xs flex items-center justify-center transition border border-slate-200 cursor-pointer" title="Agregar 1 Cama al estudio">
+                      <i class="fa-solid fa-plus text-[10px]"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selector Táctil Rápido de Días en Pills para el ABM -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none" id="pillContainerDiasAdmin">
+              <button type="button" onclick="seleccionarDiaAdminPill('todos')" id="pillAdminDia_todos" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-pk-purple text-white shadow-xs">
+                <i class="fa-solid fa-calendar-week mr-1"></i> Toda la Semana
+              </button>
+              <button type="button" onclick="seleccionarDiaAdminPill('Lunes')" id="pillAdminDia_Lunes" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200">
+                Lunes
+              </button>
+              <button type="button" onclick="seleccionarDiaAdminPill('Martes')" id="pillAdminDia_Martes" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200">
+                Martes
+              </button>
+              <button type="button" onclick="seleccionarDiaAdminPill('Miércoles')" id="pillAdminDia_Miércoles" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200">
+                Miércoles
+              </button>
+              <button type="button" onclick="seleccionarDiaAdminPill('Jueves')" id="pillAdminDia_Jueves" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200">
+                Jueves
+              </button>
+              <button type="button" onclick="seleccionarDiaAdminPill('Viernes')" id="pillAdminDia_Viernes" class="pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200">
+                Viernes
+              </button>
+            </div>
+
+            <!-- Contenedor Dinámico: Grilla Semanal SigueFit o Lista ABM -->
+            <div id="gridAdminTurnos" class="w-full">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+          <!-- PESTAÑA 3: ABM PROFESORES / LICENCIADOS -->
+          <div id="subTabProfesores" class="space-y-4 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800">Cuerpo de Kinesiología y Fisioterapia</h3>
+                <p class="text-xs text-slate-500">Datos profesionales, matrículas y cuentas para transferencias de alumnos.</p>
+              </div>
+              <button onclick="abrirModalProfesor()" class="px-3.5 py-2 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
+                <i class="fa-solid fa-user-doctor"></i>
+                Nuevo Licenciado / Profe (Alta)
+              </button>
+            </div>
+
+            <div id="gridAdminProfesores" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+          <!-- PESTAÑA 4: GESTIÓN DE ARANCELES -->
+          <div id="subTabPromociones" class="space-y-4 hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800">Aranceles y Convenios de Obra Social</h3>
+                <p class="text-xs text-slate-500">Particular ($50.000) y Obra Social Instituto de Seguro ($35.000 con carnet).</p>
+              </div>
+              <button onclick="abrirModalNuevaPromo()" class="px-3.5 py-2 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i>
+                Nuevo Arancel / Promo (Alta)
+              </button>
+            </div>
+
+            <div id="gridAdminPromos" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- Dinámico -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ========================================== -->
+  <!-- 💬 WIDGET FLOTANTE CHATBOT WHATSAPP -->
+  <!-- ========================================== -->
+  <div class="fixed bottom-5 right-5 z-50">
+    <button id="btnOpenBot" onclick="toggleChatbot()" class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition-transform hover:scale-105 relative">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-bounce">1</span>
+    </button>
+
+    <div id="botWindow" class="hidden absolute bottom-16 right-0 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[520px]">
+      <div class="bg-emerald-700 p-3 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <img src="./logo.jpg" class="w-9 h-9 rounded-full object-cover bg-white p-0.5 border border-white/20">
+          <div>
+            <h4 class="text-xs font-bold leading-tight flex items-center gap-1">
+              PK Pilates Kinésico Bot
+              <i class="fa-solid fa-circle-check text-emerald-300 text-[10px]"></i>
+            </h4>
+            <span class="text-[10px] text-emerald-100 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
+              En línea (Auto-Turnos 24/7)
+            </span>
+          </div>
+        </div>
+        <button onclick="toggleChatbot()" class="text-white/80 hover:text-white p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-3 bg-[#e5ddd5]/40 text-xs">
+        <div class="flex flex-col items-start">
+          <div class="bg-white rounded-2xl rounded-tl-none p-3 shadow-xs max-w-[85%] border border-slate-100">
+            <p class="font-bold text-pk-purple text-[11px] mb-1">¡Hola! Buenas tardes 😊</p>
+            <p class="text-slate-700 text-[11px] leading-relaxed">
+              Te compartimos nuestros horarios disponibles para las clases de <b>PILATES KINÉSICO</b> con el <b>Lic. Gustavo Moyano</b> y la <b>Lic. Agustina Maidana</b>.<br><br>
+              💚 <i>Tu bienestar, en manos de profesionales de la salud.</i>
+            </p>
+            <span class="text-[9px] text-slate-400 block text-right mt-1">10:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-2 bg-slate-100 border-t border-slate-200 flex flex-wrap gap-1.5">
+        <button onclick="botResponder('turnos')" class="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-bold transition">
+          📅 Horarios
+        </button>
+        <button onclick="botResponder('promos')" class="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-bold transition">
+          💰 Aranceles
+        </button>
+        <button onclick="botResponder('beneficios')" class="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-bold transition">
+          🧘 Beneficios
+        </button>
+        <button onclick="botResponder('alias')" class="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-bold transition">
+          💳 CBU / Alias
+        </button>
+      </div>
+
+      <form onsubmit="enviarMensajeUsuario(event)" class="p-2 bg-white border-t border-slate-200 flex items-center gap-1.5">
+        <input type="text" id="inputChatMsg" placeholder="Escribe tu consulta..." class="flex-1 text-xs border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+        <button type="submit" class="w-8 h-8 bg-emerald-600 text-white rounded-xl flex items-center justify-center hover:bg-emerald-700 transition">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- MODALES DE ABM (ALTAS Y MODIFICACIONES) -->
+  <!-- ======================================================= -->
+
+  <!-- 1. MODAL ABM: ALUMNO (ALTA / MODIFICACIÓN) -->
+  <div id="modalAlumno" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="cerrarModalAlumno()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+
+      <div class="border-b border-slate-200 pb-3 mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-0.5 bg-purple-100 text-pk-purple text-[10px] font-black uppercase rounded-md tracking-wider">Ficha Clínica & Padrón</span>
+        </div>
+        <h3 id="modalAlumnoTitulo" class="text-base sm:text-lg font-black text-slate-900">Registrar Nuevo Alumno</h3>
+        <p class="text-xs text-slate-500">Datos personales, habilitación, cobertura médica y ficha de control postural.</p>
+      </div>
+
+      <form id="formAlumno" onsubmit="guardarAlumnoSubmit(event)" class="space-y-3.5">
+        <input type="hidden" id="modalAlumnoEditId">
+        
+        <!-- Estado de Habilitación (Switch / Checkbox destacado) -->
+        <div class="p-3 bg-purple-50/60 rounded-2xl border border-purple-200 flex items-center justify-between">
+          <div>
+            <span class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-id-badge text-pk-purple"></i> Estado de Habilitación
+            </span>
+            <p class="text-[10px] text-slate-500">Los alumnos inhabilitados no ocupan turnos activos.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="aluHabilitado" checked class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            <span id="aluHabilitadoTexto" class="ml-2 text-xs font-bold text-emerald-800">Habilitado</span>
+          </label>
+        </div>
+
+        <!-- Nombre Completo y DNI -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo: *</label>
+            <input type="text" id="aluNombre" required placeholder="Nombre y Apellido" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple font-medium">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">DNI / Doc:</label>
+            <input type="text" id="aluDni" placeholder="Ej: 32.145.890" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple font-medium">
+          </div>
+        </div>
+
+        <!-- WhatsApp Móvil y Grupo Etario -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil: *</label>
+            <div class="relative">
+              <input type="tel" id="aluTel" required placeholder="549388..." class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 pl-8 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple font-medium">
+              <i class="fa-brands fa-whatsapp absolute left-2.5 top-3 text-emerald-600 text-xs"></i>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Grupo Etario:</label>
+            <select id="aluGrupoEtario" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium">
+              <option value="adulto">Adulto</option>
+              <option value="adulto_mayor">Adulto Mayor (+60 años)</option>
+              <option value="joven">Joven / Adolescente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Obra Social y N° Carnet -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Cobertura / Obra Social:</label>
+            <select id="aluObraSocial" onchange="actualizarMontoPorObraSocial()" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+              <option value="Particular">Particular ($50.000 / mes)</option>
+              <option value="Obra Social Instituto de Seguro">Obra Social Instituto de Seguro ($35.000 / mes)</option>
+              <option value="Otra Obra Social">Otra Obra Social / Prepaga</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">N° Carnet / Afiliado:</label>
+            <input type="text" id="aluCarnetOS" placeholder="Ej: 84920" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple">
+          </div>
+        </div>
+
+        <!-- Kinesiólogo Asignado y Cuota -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kinesiólogo a Cargo:</label>
+            <select id="aluKinesiologo" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium">
+              <option value="Lic. Gustavo Moyano">Lic. Gustavo Moyano (MP 3.840)</option>
+              <option value="Lic. Agustina Maidana">Lic. Agustina Maidana (MP 4.120)</option>
+              <option value="Equipo PK">Equipo PK (Indistinto)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Cuota Mensual ($):</label>
+            <input type="number" id="aluMonto" required value="50000" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-900">
+          </div>
+        </div>
+
+        <!-- Patología / Diagnóstico Médico -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Patología / Motivo de Consulta Kinésica:</label>
+          <input type="text" id="aluPatologias" placeholder="Ej: Hernia discal L5-S1, cervicobraquialgia, escoliosis..." class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple">
+        </div>
+
+        <!-- Observaciones Clínicas / Notas -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Observaciones Kinésicas & Notas Futuras:</label>
+          <textarea id="aluObservaciones" rows="2" placeholder="Indicaciones posturales, ejercicios desaconsejados, evolución..." class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pk-purple resize-none"></textarea>
+        </div>
+
+        <!-- Estado de Pago -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Estado de Cuenta / Arancel:</label>
+          <select id="aluEstado" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium">
+            <option value="al_dia">🟢 Al Día (Sin deuda mensual)</option>
+            <option value="por_vencer">🟡 Por Vencer (Próximo a abonar)</option>
+            <option value="atrasado">🔴 Atrasado / Adeuda Cuota</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="cerrarModalAlumno()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Guardar en Padrón
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 2. MODAL ABM: HORARIO DE TURNO & CANTIDAD DE CAMAS (ALTA / MODIFICACIÓN) -->
+  <div id="modalTurno" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 relative">
+      <button onclick="cerrarModalTurno()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <h3 id="modalTurnoTitulo" class="text-base font-black text-slate-900 mb-1">Nuevo Horario de Turno</h3>
+      <p class="text-xs text-slate-500 mb-3">Define día, franja horaria, kinesiólogo y camas reformer disponibles.</p>
+
+      <form id="formTurno" onsubmit="guardarTurnoSubmit(event)" class="space-y-3">
+        <input type="hidden" id="modalTurnoEditId">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Día:</label>
+            <select id="turnoDia" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-bold">
+              <option value="Lunes">Lunes</option>
+              <option value="Martes">Martes</option>
+              <option value="Miércoles">Miércoles</option>
+              <option value="Jueves">Jueves</option>
+              <option value="Viernes">Viernes</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Horario (Franja):</label>
+            <input type="text" id="turnoHora" required placeholder="Ej: 08:00 - 09:00" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Kinesiólogo / Licenciado Responsable:</label>
+          <select id="turnoProfeId" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-bold">
+            <!-- Dinámico -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Clase:</label>
+          <input type="text" id="turnoTipo" required value="Pilates Kinésico" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div class="bg-purple-50 p-3 rounded-xl border border-purple-200">
+          <label class="block text-xs font-extrabold text-pk-purple mb-1">
+            <i class="fa-solid fa-bed mr-1"></i> Cantidad de Camas Reformer (Cupo Máximo):
+          </label>
+          <input type="number" id="turnoCupoMax" min="1" max="15" value="4" required class="w-full text-xs font-black border border-purple-300 rounded-lg p-2 text-center bg-white">
+          <p class="text-[10px] text-slate-500 mt-1">Límite de camas reformer para este horario (predeterminado: 4 camas).</p>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-pk-teal hover:bg-pk-tealDark text-white font-bold text-xs rounded-xl shadow-xs transition mt-2">
+          Guardar Horario & Camas
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 🔐 MODAL DE SEGURIDAD: ACCESO AL PANEL ABM -->
+  <!-- ========================================== -->
+  <div id="modalLoginAdmin" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 relative text-center animate-fade-in">
+      <button onclick="cerrarModalLoginAdmin()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="w-14 h-14 rounded-2xl bg-purple-100 text-pk-purple flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <h3 class="text-base font-black text-slate-900">Acceso Seguro al Panel</h3>
+      <p class="text-xs text-slate-500 mt-1 mb-4">
+        Exclusivo para Kinesiólogos y Gestión de PILATES KINÉSICO.
+      </p>
+
+      <form id="formLoginAdmin" onsubmit="verificarLoginAdminSubmit(event)" class="space-y-4">
+        <div class="text-left">
+          <label class="block text-xs font-bold text-slate-700 mb-1">PIN o Clave Administrativa:</label>
+          <div class="relative">
+            <input type="password" id="inputAdminPin" required placeholder="Ingresá tu PIN (Predeterminado: 2026)" class="w-full text-center tracking-widest text-base font-black bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-pk-purple focus:ring-2 focus:ring-pk-purple">
+            <button type="button" onclick="toggleMostrarPin()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 text-sm">
+              <i class="fa-regular fa-eye" id="iconVerPin"></i>
+            </button>
+          </div>
+          <div id="txtErrorLogin" class="text-xs text-rose-600 font-bold mt-2 hidden flex items-center gap-1.5 bg-rose-50 p-2 rounded-lg border border-rose-200">
+            <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+            <span>PIN incorrecto. Intenta nuevamente.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-pk-purple hover:bg-pk-purpleDark text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-lock-open"></i>
+          <span>Ingresar al Panel de Control</span>
+        </button>
+
+        <p class="text-[10px] text-slate-400">
+          🔒 PIN oficial predeterminado: <b class="text-slate-600 font-bold">2026</b> (Podés modificarlo adentro cuando gustes).
+        </p>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 3. MODAL ABM: PROFESOR / LICENCIADO (ALTA / MODIFICACIÓN COMPLETA) -->
+  <div id="modalProfesor" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="cerrarModalProfesor()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+
+      <div class="border-b border-slate-200 pb-3 mb-4">
+        <h3 id="modalProfeTitulo" class="text-base sm:text-lg font-black text-slate-900">Registrar Licenciado / Profesor</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Gestión de datos profesionales, matrícula, horarios y datos bancarios para transferencias.</p>
+      </div>
+
+      <form id="formProfesor" onsubmit="guardarProfesorSubmit(event)" class="space-y-4">
+        <input type="hidden" id="modalProfeEditId">
+
+        <!-- 1. Perfil Profesional -->
+        <div class="space-y-3">
+          <span class="text-[10px] font-black uppercase text-pk-purple tracking-wider block">1. Perfil Profesional</span>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo y Título: <span class="text-rose-500">*</span></label>
+            <input type="text" id="profeNombre" required placeholder="Ej: Lic. Gustavo Moyano" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Matrícula Profesional (MP / MN): <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeMatricula" required placeholder="Ej: MP 3.840" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp Móvil: <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeTel" required placeholder="Ej: 5493884123456" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Especialidad: <span class="text-rose-500">*</span></label>
+            <input type="text" id="profeEspecialidad" required placeholder="Ej: Pilates Kinésico & Rehabilitación Funcional" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Días de Atención:</label>
+              <input type="text" id="profeDias" placeholder="Ej: Lunes a Viernes / Martes y Jueves" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Detalle de Franjas Horarias:</label>
+              <input type="text" id="profeTurnosDetalle" placeholder="Ej: Mañana (08:00 y 09:00 hs) y Siesta (15:00 a 17:00 hs)" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Datos Bancarios -->
+        <div class="border-t border-slate-200 pt-3 space-y-3">
+          <span class="text-[10px] font-black uppercase text-pk-purple tracking-wider block">2. Cuenta Bancaria para Transferencias de Alumnos</span>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Banco o Billetera Digital: <span class="text-rose-500">*</span></label>
+            <input type="text" id="profeBanco" required placeholder="Ej: Banco Macro, Mercado Pago, etc." class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Titular de Cuenta: <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeTitular" required placeholder="Ej: Gustavo Moyano" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">CUIT / CUIL: <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeCuit" required placeholder="Ej: 20-31849204-7" class="w-full text-xs font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-pk-purple mb-1">Alias de Transferencia: <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeAlias" required placeholder="Ej: gustavo.moyano.pk" class="w-full text-xs font-bold text-pk-purple border-2 border-purple-200 bg-purple-50/50 rounded-xl px-3 py-2.5 focus:outline-none focus:border-pk-purple">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">CBU / CVU (22 dígitos): <span class="text-rose-500">*</span></label>
+              <input type="text" id="profeCbu" required placeholder="Ej: 2850590940090418135201" class="w-full text-xs font-mono font-medium border border-slate-300 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-pk-purple">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Estado Activo -->
+        <div class="pt-2 border-t border-slate-200 flex items-center justify-between">
+          <label class="text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="profeActivo" checked class="w-4 h-4 text-pk-purple rounded border-slate-300 focus:ring-pk-purple cursor-pointer">
+            <span>Profesional Activo (Disponible para reservas y clases)</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-pk-purple hover:bg-pk-purpleDark text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer mt-3">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Guardar Datos Profesionales</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 4. MODAL: AUTO-RESERVA DE CAMA (ALUMNO) -->
+  <div id="modalReserva" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 relative">
+      <button onclick="cerrarModalReserva()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="mb-4">
+        <span class="text-[10px] font-bold uppercase text-pk-purple tracking-wider">Inscripción a Camilla Reformer</span>
+        <h3 id="modalReservaTitulo" class="text-lg font-black text-slate-900">Confirmar Reserva de Turno</h3>
+        <p id="modalReservaSubtitulo" class="text-xs text-slate-500">Pilates Kinésico con Kinesiólogos Matriculados.</p>
+      </div>
+
+      <form id="formReservaTurno" onsubmit="confirmarReservaSubmit(event)" class="space-y-3">
+        <input type="hidden" id="modalTurnoId">
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre y Apellido Completo:</label>
+          <input type="text" id="reservaNombre" required placeholder="Ej: Marcela Gómez" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono Móvil (WhatsApp):</label>
+          <input type="tel" id="reservaTelefono" required placeholder="Ej: 388 4123456" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Plan / Arancel:</label>
+          <select id="reservaObraSocial" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-bold">
+            <option value="Particular">Particular ($50.000 / mes - 2 clases semanales)</option>
+            <option value="Obra Social Instituto de Seguro">Obra Social Instituto de Seguro ($35.000 / mes con Carnet)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">¿Presentas alguna molestia o patología previa?</label>
+          <input type="text" id="reservaLesion" placeholder="Ej: Lumbalgia, contracturas, o ninguna" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Modalidad de Pago:</label>
+          <select id="reservaPago" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+            <option value="transferencia">Transferencia bancaria / Billetera Digital (Alias)</option>
+            <option value="efectivo">Efectivo en el estudio</option>
+            <option value="abono">Ya cuento con cuota activa</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-md transition mt-2">
+          Confirmar y Guardar Mi Cama
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 5. MODAL: NUEVA PROMOCIÓN / ARANCEL -->
+  <div id="modalNuevaPromo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 relative">
+      <button onclick="cerrarModalNuevaPromo()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <h3 class="text-base font-black text-slate-900 mb-1">Crear Arancel o Convenio</h3>
+      <p class="text-xs text-slate-500 mb-3">Se reflejará en la sección de tarifas y en el bot de WhatsApp.</p>
+
+      <form onsubmit="guardarNuevaPromoSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Título:</label>
+          <input type="text" id="promoTitulo" required placeholder="Ej: Convenio Mutual / OS" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción:</label>
+          <textarea id="promoDesc" required placeholder="Condiciones y clases incluidas..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 h-20"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Arancel Mensual ($):</label>
+            <input type="number" id="promoPrecio" required value="50000" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Etiqueta:</label>
+            <input type="text" id="promoTag" placeholder="Ej: Convenio" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs transition mt-2">
+          Publicar Arancel
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 6. MODAL: DETALLE DE TURNO & ALUMNOS DESIGNADOS (VENTANA EMERGENTE SIGUEFIT) -->
+  <div id="modalDetalleTurno" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="cerrarModalDetalleTurno()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+
+      <!-- Encabezado del Turno -->
+      <div class="border-b border-slate-200 pb-4 mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span id="detTurnoDia" class="px-2.5 py-0.5 bg-pk-purple text-white text-[11px] font-black uppercase rounded-md tracking-wider">Lunes</span>
+          <span id="detTurnoHora" class="text-sm font-black text-slate-900 flex items-center gap-1">
+            <i class="fa-regular fa-clock text-pk-purple text-xs"></i> 08:00 - 09:00 hs
+          </span>
+          <div id="detTurnoBadgeEstado"></div>
+        </div>
+        <h3 id="detTurnoTitulo" class="text-lg font-black text-slate-900">Pilates Kinésico</h3>
+        <p id="detTurnoProfe" class="text-xs text-slate-600 mt-0.5 flex items-center gap-1.5"></p>
+      </div>
+
+      <!-- Barra de Ocupación de Camas -->
+      <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 mb-3">
+        <div class="flex items-center justify-between text-xs mb-1.5 font-bold">
+          <span id="detOcupacionTexto" class="text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-bed text-pk-purple"></i> Ocupación: 0 de 6 camas
+          </span>
+          <span id="detOcupacionPorcentaje" class="text-pk-purple">0%</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+          <div id="detBarraProgreso" class="h-2.5 rounded-full bg-pk-purple transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Ajuste Rápido de Camas de este Turno Individual -->
+      <div class="flex items-center justify-between bg-purple-50/60 px-3 py-2 rounded-xl border border-purple-200 mb-4 text-xs">
+        <span class="text-slate-700 font-bold flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-pk-purple"></i> Camas de este Horario:
+        </span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="ajustarCamasTurnoActual(-1)" class="w-6 h-6 rounded-md bg-white hover:bg-rose-50 hover:text-rose-700 text-slate-800 font-black text-xs flex items-center justify-center transition border border-purple-200 shadow-2xs cursor-pointer" title="Quitar 1 Cama de este turno">
+            <i class="fa-solid fa-minus text-[10px]"></i>
+          </button>
+          <span id="detCupoMaxTurno" class="font-black text-pk-purple px-1">6 Camas</span>
+          <button type="button" onclick="ajustarCamasTurnoActual(1)" class="w-6 h-6 rounded-md bg-white hover:bg-emerald-50 hover:text-emerald-700 text-slate-800 font-black text-xs flex items-center justify-center transition border border-purple-200 shadow-2xs cursor-pointer" title="Agregar 1 Cama a este turno">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Camas del Turno (Cama 1 a Cama N) -->
+      <div class="space-y-3 mb-5">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-users text-pk-teal"></i> Alumnos Designados por Cama:
+          </h4>
+          <span id="detTotalInscriptos" class="text-[11px] font-bold text-slate-500"></span>
+        </div>
+
+        <div id="detListaCamas" class="space-y-2">
+          <!-- Dinámico: Cama 1, Cama 2, etc. -->
+        </div>
+      </div>
+
+      <!-- Asignación Rápida & Acciones Inferiores -->
+      <div class="pt-4 border-t border-slate-200 space-y-3">
+        <div id="detSeccionAcciones" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <!-- Dinámico -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 7. MODAL: REUBICACIÓN & CONSENSO DE HORARIOS POR REDUCCIÓN DE CAMAS -->
+  <div id="modalReubicacionCupos" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-rose-200 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="cerrarModalReubicacion()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+
+      <div class="border-b border-rose-100 pb-3 mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-black">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </span>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">Atención: Ajuste de Capacidad de Camas</h3>
+            <p class="text-xs text-rose-600 font-bold">Hay alumnos inscriptos en los cupos que se van a reducir.</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-600 mt-2">
+          Para bajar la capacidad del estudio a <b id="lblNuevaCapacidadReduccion" class="text-rose-600 font-black"></b> camas, no se puede dejar a ningún alumno sin clase. 
+          Reubica a los alumnos en otro horario disponible o consénsualo directamente por WhatsApp con el alumno y profesor:
+        </p>
+      </div>
+
+      <!-- Listado de Alumnos Excedentes a Reubicar -->
+      <div id="listaAlumnosAReubicar" class="space-y-3 mb-5">
+        <!-- Dinámico -->
+      </div>
+
+      <div class="pt-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <button onclick="cerrarModalReubicacion()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+          Cancelar Ajuste
+        </button>
+        <button onclick="reintentarVerificarReduccion()" class="px-4 py-2 bg-pk-purple hover:bg-pk-purpleDark text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Verificar Reubicaciones y Aplicar Capacidad</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- SCRIPTS DE LÓGICA DE NEGOCIO Y RENDERIZADO -->
+  <!-- ========================================== -->
+    <script src="./app.js"></script>
+  <script>
+    let currentRole = 'alumno';
+    let isMobileView = false;
+    let selectedProfeId = 1;
+    let filtroEstadoAlumno = 'todos';
+    let filtroDiaAdmin = 'todos';
+    let filtroProfeAdmin = 'todos';
+    let adminTurnosView = 'grilla';
+    let _capacidadPendienteReduccion = null;
+    let _selectedTurnoIdDetalle = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Limpiar datos viejos de caché local para cargar los datos oficiales reales con Padrón Central (v7)
+      if (localStorage.getItem('pk_version_oficial') !== '7.0') {
+        localStorage.clear();
+        localStorage.setItem('pk_version_oficial', '7.0');
+      }
+
+      await window.PKStore.init();
+      actualizarBadgeStatus();
+      initFiltros();
+      renderCobroCard();
+      renderAdminDashboard();
+
+      // Listener para toggle de habilitación en el modal de alumno
+      const chkHab = document.getElementById('aluHabilitado');
+      if (chkHab) {
+        chkHab.addEventListener('change', function() {
+          const lbl = document.getElementById('aluHabilitadoTexto');
+          if (lbl) {
+            lbl.innerText = this.checked ? 'Habilitado' : 'Inhabilitado';
+            lbl.className = this.checked ? 'ml-2 text-xs font-bold text-emerald-800' : 'ml-2 text-xs font-bold text-amber-800';
+          }
+        });
+      }
+    });
+
+    function actualizarMontoPorObraSocial() {
+      const os = document.getElementById('aluObraSocial')?.value;
+      const montoInput = document.getElementById('aluMonto');
+      if (!montoInput) return;
+      if (os && os.includes('Seguro')) {
+        montoInput.value = 35000;
+      } else if (os === 'Particular') {
+        montoInput.value = 50000;
+      }
+    }
+
+    function actualizarBadgeStatus() {
+      const badge = document.getElementById('badgeApiStatus');
+      const txt = document.getElementById('txtApiStatus');
+      if (!badge || !txt) return;
+      if (window.PKStore.isApiConnected) {
+        badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200';
+        txt.innerText = 'API Servidor Conectada';
+      } else {
+        badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200';
+        txt.innerText = 'Modo Local (PWA)';
+      }
+    }
+
+    // ==========================================
+    // SEGURIDAD & CONTROL DE ACCESO AL PANEL ABM
+    // ==========================================
+    function isAdminAuthenticated() {
+      return sessionStorage.getItem('pk_admin_auth') === 'true';
+    }
+
+    function abrirModalLoginAdmin() {
+      const pinInput = document.getElementById('inputAdminPin');
+      if (pinInput) pinInput.value = '';
+      const err = document.getElementById('txtErrorLogin');
+      if (err) err.classList.add('hidden');
+      document.getElementById('modalLoginAdmin').classList.remove('hidden');
+      setTimeout(() => pinInput && pinInput.focus(), 150);
+    }
+
+    function cerrarModalLoginAdmin() {
+      document.getElementById('modalLoginAdmin').classList.add('hidden');
+    }
+
+    function toggleMostrarPin() {
+      const inp = document.getElementById('inputAdminPin');
+      const icon = document.getElementById('iconVerPin');
+      if (!inp || !icon) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    function verificarLoginAdminSubmit(e) {
+      e.preventDefault();
+      const pinIngresado = document.getElementById('inputAdminPin').value.trim();
+      const pinValido = String(window.PKStore.configuracion.adminPin || '2026');
+
+      if (pinIngresado === pinValido) {
+        sessionStorage.setItem('pk_admin_auth', 'true');
+        cerrarModalLoginAdmin();
+        setRole('profesor');
+      } else {
+        const err = document.getElementById('txtErrorLogin');
+        if (err) err.classList.remove('hidden');
+        document.getElementById('inputAdminPin').select();
+      }
+    }
+
+    function cerrarSesionAdmin() {
+      sessionStorage.removeItem('pk_admin_auth');
+      setRole('alumno');
+      alert('Sesión administrativa finalizada. El panel de gestión quedó bloqueado bajo clave.');
+    }
+
+    async function cambiarPinSeguridadPrompt() {
+      const actual = prompt('Por seguridad, ingresá tu PIN actual:');
+      if (actual === null) return;
+
+      const pinValido = String(window.PKStore.configuracion.adminPin || '2026');
+      if (actual.trim() !== pinValido) {
+        alert('El PIN actual ingresado es incorrecto.');
+        return;
+      }
+
+      const nuevo = prompt('Ingresá tu NUEVO PIN de seguridad (mínimo 4 caracteres o dígitos):');
+      if (!nuevo || nuevo.trim().length < 4) {
+        alert('El nuevo PIN debe tener al menos 4 caracteres.');
+        return;
+      }
+
+      const confirmar = prompt('Confirma nuevamente el nuevo PIN:');
+      if (confirmar !== nuevo) {
+        alert('Los PINs no coinciden. La clave de seguridad no fue modificada.');
+        return;
+      }
+
+      await window.PKStore.actualizarPinSeguridad(nuevo.trim());
+      alert(`¡PIN de seguridad actualizado con éxito! Recordá tu nueva clave: ${nuevo.trim()}`);
+    }
+
+    function setRole(role) {
+      if (role === 'profesor' && !isAdminAuthenticated()) {
+        abrirModalLoginAdmin();
+        return;
+      }
+
+      currentRole = role;
+      const viewAlumno = document.getElementById('viewAlumno');
+      const viewProfesor = document.getElementById('viewProfesor');
+      const btnAlumno = document.getElementById('btnRoleAlumno');
+      const btnProfe = document.getElementById('btnRoleProfe');
+      const btnBloquear = document.getElementById('btnNavBloquear');
+
+      if (role === 'alumno') {
+        viewAlumno.classList.remove('hidden');
+        viewProfesor.classList.add('hidden');
+        btnAlumno.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-pk-purple text-white shadow-xs';
+        btnProfe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple';
+        if (btnBloquear) {
+          btnBloquear.classList.add('hidden');
+          btnBloquear.classList.remove('inline-flex');
+        }
+        onCambioProfeAlumno();
+      } else {
+        viewAlumno.classList.add('hidden');
+        viewProfesor.classList.remove('hidden');
+        btnProfe.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-pk-purple text-white shadow-xs';
+        btnAlumno.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-pk-purple';
+        if (btnBloquear) {
+          btnBloquear.classList.remove('hidden');
+          btnBloquear.classList.add('inline-flex');
+        }
+        renderAdminDashboard();
+      }
+    }
+
+    function toggleMobileView() {
+      isMobileView = !isMobileView;
+      const container = document.getElementById('appContainer');
+      const txt = document.getElementById('txtMobileToggle');
+
+      if (isMobileView) {
+        container.className = 'mobile-frame py-6 px-3 my-6';
+        txt.innerText = 'Vista Completa';
+      } else {
+        container.className = 'py-6 px-3 sm:px-6 transition-all duration-300';
+        txt.innerText = 'Simular Celular';
+      }
+    }
+
+    function initFiltros() {
+      // 1. Combo Box Kinesiólogos para el panel de inscripción de alumnos
+      const selectAlumnoProfe = document.getElementById('alumnoReservaProfe');
+      if (selectAlumnoProfe) {
+        selectAlumnoProfe.innerHTML = window.PKStore.profesionales.map(p => 
+          `<option value="${p.id}">${p.nombre} (${p.diasAtencion || p.especialidad})</option>`
+        ).join('');
+      }
+
+      // 2. Filtro de profesionales para el ABM
+      const selectFiltroAdmin = document.getElementById('selectFiltroProfeAdmin');
+      if (selectFiltroAdmin) {
+        selectFiltroAdmin.innerHTML = '<option value="todos">Todos los profesionales / Licenciados</option>' +
+          window.PKStore.profesionales.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+      }
+
+      // 3. Select para cobros y modal de turnos
+      const selectCobro = document.getElementById('selectProfeCobro');
+      const selectTurnoProfe = document.getElementById('turnoProfeId');
+      if (selectCobro) {
+        selectCobro.innerHTML = window.PKStore.profesionales.map(p => 
+          `<option value="${p.id}">${p.nombre} - ${p.banco}</option>`
+        ).join('');
+      }
+      if (selectTurnoProfe) {
+        selectTurnoProfe.innerHTML = window.PKStore.profesionales.map(p => 
+          `<option value="${p.id}">${p.nombre} (${p.matricula})</option>`
+        ).join('');
+      }
+
+      // 4. Configurar camas globales en el input del ABM
+      const inputCamas = document.getElementById('inputCamasGlobal');
+      const lblCamas = document.getElementById('lblCamasEstudioAdmin');
+      const cantCamas = window.PKStore.configuracion.camasDefault || 6;
+      if (inputCamas) inputCamas.value = cantCamas;
+      if (lblCamas) lblCamas.innerText = `${cantCamas} Camas`;
+
+      // Inicializar ficha y checkboxes de horarios del primer profesor
+      onCambioProfeAlumno();
+    }
+
+    // ==========================================
+    // 1. MÓDULO ALUMNO: COMBO BOX + HORARIOS EN CHECKBOXES
+    // ==========================================
+    function onCambioProfeAlumno() {
+      const select = document.getElementById('alumnoReservaProfe');
+      if (!select) return;
+      const profeId = parseInt(select.value) || 1;
+      const profe = window.PKStore.profesionales.find(p => p.id === profeId) || window.PKStore.profesionales[0];
+
+      // Ficha informativa del profesional
+      const ficha = document.getElementById('fichaProfeSeleccionado');
+      if (ficha && profe) {
+        ficha.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-purple-100 text-pk-purple flex items-center justify-center font-bold text-base shadow-xs">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                ${profe.nombre}
+                <span class="px-2 py-0.5 bg-purple-100 text-pk-purple rounded text-[10px] font-bold">${profe.matricula}</span>
+              </h4>
+              <p class="text-[11px] text-slate-600">${profe.especialidad}</p>
+              <p class="text-[10px] text-slate-400 font-semibold">${profe.diasAtencion || ''} • ${profe.turnosDetalle || ''}</p>
+            </div>
+          </div>
+          <a href="https://wa.me/${profe.telefono}?text=Hola%20${encodeURIComponent(profe.nombre)}" target="_blank" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-bold text-xs border border-emerald-200 transition flex items-center gap-1.5">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span class="hidden sm:inline">Consultar</span>
+          </a>
+        `;
+      }
+
+      renderHorariosCheckboxesAlumno(profeId);
+    }
+
+    function renderHorariosCheckboxesAlumno(profeId) {
+      const cont = document.getElementById('contenedorCheckboxesHorarios');
+      if (!cont) return;
+
+      const turnosProfe = window.PKStore.turnos.filter(t => t.profesorId === profeId);
+      const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+      if (turnosProfe.length === 0) {
+        cont.innerHTML = `
+          <div class="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-500 border border-slate-200">
+            No hay horarios programados para este profesional actualmente.
+          </div>
+        `;
+        actualizarResumenTurnosSeleccionados();
+        return;
+      }
+
+      cont.innerHTML = dias.map(dia => {
+        const turnosDia = turnosProfe.filter(t => t.dia === dia);
+        if (turnosDia.length === 0) return '';
+
+        const checkboxesHTML = turnosDia.map(t => {
+          const ocupados = t.inscriptos.length;
+          const libres = t.cupoMax - ocupados;
+          const estaLleno = libres <= 0;
+
+          if (estaLleno) {
+            return `
+              <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-100/80 cursor-not-allowed opacity-75">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" disabled class="w-4 h-4 text-slate-400 rounded cursor-not-allowed">
+                  <div>
+                    <span class="text-xs font-bold text-slate-500 line-through">${t.hora} hs</span>
+                    <span class="block text-[10px] text-slate-400">${t.tipo}</span>
+                  </div>
+                </div>
+                <span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-lg text-[10px]">
+                  <i class="fa-solid fa-lock mr-1"></i>Completo (${t.cupoMax} camas)
+                </span>
+              </label>
+            `;
+          }
+
+          return `
+            <label class="flex items-center justify-between p-3 rounded-xl border border-purple-100 bg-white hover:bg-purple-50/50 hover:border-purple-300 transition cursor-pointer shadow-xs">
+              <div class="flex items-center gap-2.5">
+                <input type="checkbox" name="chkTurnoAlumno" value="${t.id}" data-dia="${t.dia}" data-hora="${t.hora}" onchange="actualizarResumenTurnosSeleccionados()" class="w-4 h-4 text-pk-purple rounded border-slate-300 focus:ring-pk-purple cursor-pointer">
+                <div>
+                  <span class="text-xs font-black text-slate-900">${t.hora} hs</span>
+                  <span class="block text-[10px] text-slate-500 font-medium">${t.tipo}</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-0.5 ${libres === 1 ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'} font-bold rounded-lg text-[10px] flex items-center gap-1">
+                <i class="fa-solid fa-bed text-pk-teal"></i> ${libres} ${libres === 1 ? 'última cama' : 'camas libres'} (de ${t.cupoMax})
+              </span>
+            </label>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-black text-xs text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                <i class="fa-regular fa-calendar-check text-pk-purple"></i> ${dia}
+              </span>
+              <span class="text-[10px] text-slate-400 font-semibold">${turnosDia.length} horarios disponibles</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${checkboxesHTML}
+            </div>
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      actualizarResumenTurnosSeleccionados();
+    }
+
+    function actualizarResumenTurnosSeleccionados() {
+      const checkedBoxes = document.querySelectorAll('input[name="chkTurnoAlumno"]:checked');
+      const count = checkedBoxes.length;
+      const badge = document.getElementById('badgeClasesContador');
+      const box = document.getElementById('resumenTurnosSeleccionadosBox');
+      const txt = document.getElementById('txtResumenTurnosSeleccionados');
+
+      if (badge) {
+        if (count === 0) {
+          badge.innerText = '0 horarios seleccionados';
+          badge.className = 'text-xs font-bold text-slate-400';
+        } else if (count === 2) {
+          badge.innerText = '2 horarios seleccionados (Abono completo)';
+          badge.className = 'text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200';
+        } else {
+          badge.innerText = `${count} ${count === 1 ? 'horario seleccionado' : 'horarios seleccionados'}`;
+          badge.className = 'text-xs font-bold text-pk-purple bg-purple-50 px-2 py-0.5 rounded-md';
+        }
+      }
+
+      if (box && txt) {
+        if (count > 0) {
+          box.classList.remove('hidden');
+          const turnosArray = Array.from(checkedBoxes).map(cb => {
+            return `${cb.getAttribute('data-dia')} ${cb.getAttribute('data-hora')} hs`;
+          });
+          txt.innerText = turnosArray.join(' • ');
+        } else {
+          box.classList.add('hidden');
+          txt.innerText = '';
+        }
+      }
+    }
+
+    async function confirmarInscripcionAlumnoSubmit(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('alumnoReservaNombre').value.trim();
+      const telefono = document.getElementById('alumnoReservaTelefono').value.trim();
+      const plan = document.getElementById('alumnoReservaPlan').value;
+      const patologia = document.getElementById('alumnoReservaPatologia').value.trim();
+      const isSenior = document.getElementById('alumnoReservaSenior')?.checked;
+
+      const checkedBoxes = document.querySelectorAll('input[name="chkTurnoAlumno"]:checked');
+      if (checkedBoxes.length === 0) {
+        alert('Por favor selecciona al menos un horario semanal marcando las casillas correspondientes.');
+        return;
+      }
+
+      const profeSelect = document.getElementById('alumnoReservaProfe');
+      const profeId = parseInt(profeSelect.value) || 1;
+      const profe = window.PKStore.profesionales.find(p => p.id === profeId) || window.PKStore.profesionales[0];
+
+      const turnosSeleccionadosTextos = [];
+      let huboError = false;
+
+      // Inscribir en cada turno seleccionado
+      for (const cb of checkedBoxes) {
+        const turnoId = cb.value;
+        const res = await window.PKStore.reservarCupo(
+          turnoId, 
+          nombre, 
+          telefono, 
+          'Transferencia/Efectivo', 
+          plan, 
+          patologia, 
+          isSenior ? 'Adulto Mayor (60+)' : 'Adulto'
+        );
+        if (res.ok) {
+          turnosSeleccionadosTextos.push(`${cb.getAttribute('data-dia')} ${cb.getAttribute('data-hora')} hs`);
+        } else {
+          huboError = true;
+          alert(`No se pudo reservar el turno de ${cb.getAttribute('data-dia')} ${cb.getAttribute('data-hora')} hs: ${res.msg}`);
+        }
+      }
+
+      if (turnosSeleccionadosTextos.length > 0) {
+        // Armar mensaje para WhatsApp al profesional
+        const msgWA = encodeURIComponent(
+          `¡Hola ${profe.nombre}! Mi nombre es ${nombre}. Me inscribí a clases de PILATES KINÉSICO en los turnos: ${turnosSeleccionadosTextos.join(' y ')}. Plan: ${plan}. Patología/Consulta: ${patologia || 'Ninguna'}${isSenior ? ' (Adulto Mayor)' : ''}. Adjunto mis datos para coordinar el inicio. ¡Muchas gracias!`
+        );
+        window.open(`https://wa.me/${profe.telefono}?text=${msgWA}`, '_blank');
+
+        alert(`¡Felicitaciones ${nombre}! Tus camas han sido reservadas exitosamente. Se ha abierto WhatsApp para que confirmes directamente con ${profe.nombre}.`);
+
+        // Limpiar formulario y re-renderizar
+        document.getElementById('alumnoReservaNombre').value = '';
+        document.getElementById('alumnoReservaTelefono').value = '';
+        document.getElementById('alumnoReservaPatologia').value = '';
+        if (document.getElementById('alumnoReservaSenior')) document.getElementById('alumnoReservaSenior').checked = false;
+        
+        onCambioProfeAlumno();
+        renderAdminDashboard();
+      }
+    }
+
+    // ==========================================
+    // 2. MÓDULO ABM: CAPACIDAD DE CAMAS & CONSENSO
+    // ==========================================
+    function ajustarCamasPaso(delta) {
+      const input = document.getElementById('inputCamasGlobal');
+      let val = parseInt(input ? input.value : 6) || 6;
+      val = Math.max(1, val + delta);
+      if (input) input.value = val;
+      guardarCamasGlobales();
+    }
+
+    async function ajustarCamasTurnoActual(delta) {
+      if (!_selectedTurnoIdDetalle) return;
+      const turno = window.PKStore.turnos.find(t => t.id === _selectedTurnoIdDetalle);
+      if (!turno) return;
+
+      const nuevaCapacidad = turno.cupoMax + delta;
+      if (nuevaCapacidad < 1) {
+        alert('El horario debe tener al menos 1 cama.');
+        return;
+      }
+
+      if (delta < 0 && turno.inscriptos.length >= turno.cupoMax) {
+        alert(`No se puede reducir la capacidad de este horario porque tiene ${turno.inscriptos.length} alumnos inscriptos ocupando todas las camas. Primero debes liberar o reubicar a un alumno para poder quitar la cama.`);
+        return;
+      }
+
+      turno.cupoMax = nuevaCapacidad;
+      await window.PKStore.actualizarTurno(turno.id, { cupoMax: nuevaCapacidad });
+      abrirModalDetalleTurno(turno.id);
+      renderAdminDashboard();
+      onCambioProfeAlumno();
+    }
+
+    async function guardarCamasGlobales() {
+      const input = document.getElementById('inputCamasGlobal');
+      const newCant = parseInt(input.value);
+      if (!newCant || newCant < 1) {
+        alert('Por favor ingresá un número válido de camas (mínimo 1).');
+        return;
+      }
+
+      const currentDefault = window.PKStore.configuracion.camasDefault || 6;
+
+      // CASO 1: INCREMENTO DE CAMAS -> Aumento directo de cupos
+      if (newCant >= currentDefault) {
+        await window.PKStore.actualizarCamasDefault(newCant, true);
+        const lbl = document.getElementById('lblCamasEstudioAdmin');
+        if (lbl) lbl.innerText = `${newCant} Camas`;
+        alert(`¡Capacidad ampliada con éxito! El estudio ahora cuenta con ${newCant} camas Reformer por clase. Se habilitaron nuevos cupos inmediatamente en toda la grilla semanal.`);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+        return;
+      }
+
+      // CASO 2: DISMINUCIÓN DE CAMAS -> Verificar si hay alumnos inscriptos en las camas a retirar
+      const excedentes = [];
+      window.PKStore.turnos.forEach(t => {
+        if (t.inscriptos.length > newCant) {
+          for (let i = newCant; i < t.inscriptos.length; i++) {
+            excedentes.push({
+              turno: t,
+              alumnoNombre: t.inscriptos[i],
+              camaIndex: i + 1
+            });
+          }
+        }
+      });
+
+      // Si no hay alumnos afectados, se reduce sin problemas
+      if (excedentes.length === 0) {
+        await window.PKStore.actualizarCamasDefault(newCant, true);
+        const lbl = document.getElementById('lblCamasEstudioAdmin');
+        if (lbl) lbl.innerText = `${newCant} Camas`;
+        alert(`Capacidad del estudio reducida a ${newCant} camas Reformer por clase correctamente sin conflictos de alumnos.`);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+        return;
+      }
+
+      // Si hay alumnos que ocupan las camas que se van a dar de baja, abrir Modal de Consenso
+      abrirModalReubicacion(excedentes, newCant);
+    }
+
+    function abrirModalReubicacion(excedentes, newCant) {
+      window._capacidadPendienteReduccion = newCant;
+      const lbl = document.getElementById('lblNuevaCapacidadReduccion');
+      if (lbl) lbl.innerText = newCant;
+
+      const cont = document.getElementById('listaAlumnosAReubicar');
+      if (!cont) return;
+
+      cont.innerHTML = excedentes.map((exc, index) => {
+        const t = exc.turno;
+        const alumnoNombre = exc.alumnoNombre;
+        const profe = window.PKStore.profesionales.find(p => p.id === t.profesorId);
+
+        // Turnos alternativos disponibles del mismo profesional que tengan lugar bajo la nueva capacidad
+        const turnosAlternativos = window.PKStore.turnos.filter(x => 
+          x.profesorId === t.profesorId && 
+          x.id !== t.id && 
+          x.inscriptos.length < newCant
+        );
+
+        let selectDestinoHTML = '';
+        if (turnosAlternativos.length > 0) {
+          selectDestinoHTML = `
+            <select id="selReubicar_${t.id}_${index}" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-800 flex-1">
+              ${turnosAlternativos.map(alt => `
+                <option value="${alt.id}">${alt.dia} ${alt.hora} hs (${newCant - alt.inscriptos.length} camas disponibles)</option>
+              `).join('')}
+            </select>
+            <button onclick="ejecutarReubicacionAlumnoClick(${t.id}, 'selReubicar_${t.id}_${index}', '${alumnoNombre}')" class="px-3 py-1.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-lg transition whitespace-nowrap shadow-xs">
+              <i class="fa-solid fa-arrows-turn-to-dots mr-1"></i>Reubicar
+            </button>
+          `;
+        } else {
+          selectDestinoHTML = `
+            <span class="text-[11px] text-rose-600 font-bold italic">Sin otros horarios libres con ${profe?.nombre || 'el kinesiólogo'}.</span>
+          `;
+        }
+
+        // Mensaje de WhatsApp prearmado para consensuar horario con el alumno y el profesor
+        const opcionesTexto = turnosAlternativos.map(alt => `${alt.dia} ${alt.hora} hs`).join(', ');
+        const msgConsenso = encodeURIComponent(
+          `¡Hola ${alumnoNombre}! Te escribimos de PILATES KINÉSICO junto con ${profe ? profe.nombre : 'tu kinesiólogo'}. Por un ajuste de cupos en el estudio a ${newCant} camas, quisiéramos coordinar contigo para acomodarte en otro de nuestros horarios disponibles: ${opcionesTexto || 'a coordinar'}. ¿En cuál de estos te quedaría mejor asistir? ¡Avisanos para reservarte la cama!`
+        );
+
+        return `
+          <div class="bg-rose-50/60 p-4 rounded-2xl border border-rose-200 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-100 pb-2">
+              <div>
+                <span class="text-xs font-black text-slate-900">${alumnoNombre}</span>
+                <span class="block text-[11px] text-rose-700 font-bold">Ocupa la Cama ${exc.camaIndex} en: ${t.dia} ${t.hora} hs (${profe ? profe.nombre : 'Licenciado'})</span>
+              </div>
+              <a href="https://wa.me/?text=${msgConsenso}" target="_blank" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap self-start sm:self-auto">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>WhatsApp Consenso</span>
+              </a>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-500 block mb-1">Reubicar alumno en horario consensuado:</span>
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                ${selectDestinoHTML}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('modalReubicacionCupos').classList.remove('hidden');
+    }
+
+    function cerrarModalReubicacion() {
+      document.getElementById('modalReubicacionCupos').classList.add('hidden');
+      window._capacidadPendienteReduccion = null;
+    }
+
+    async function ejecutarReubicacionAlumnoClick(origenTurnoId, selectId, alumnoNombre) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      const destinoTurnoId = select.value;
+      if (!destinoTurnoId) {
+        alert('Seleccioná un horario destino disponible.');
+        return;
+      }
+
+      const res = await window.PKStore.reubicarAlumno(origenTurnoId, destinoTurnoId, alumnoNombre);
+      if (res.ok) {
+        alert(`¡${alumnoNombre} ha sido reubicado correctamente!`);
+        reintentarVerificarReduccion();
+      } else {
+        alert(res.msg);
+      }
+    }
+
+    async function reintentarVerificarReduccion() {
+      if (!window._capacidadPendienteReduccion) return;
+      const newCant = window._capacidadPendienteReduccion;
+
+      const excedentesRestantes = [];
+      window.PKStore.turnos.forEach(t => {
+        if (t.inscriptos.length > newCant) {
+          for (let i = newCant; i < t.inscriptos.length; i++) {
+            excedentesRestantes.push({
+              turno: t,
+              alumnoNombre: t.inscriptos[i],
+              camaIndex: i + 1
+            });
+          }
+        }
+      });
+
+      if (excedentesRestantes.length > 0) {
+        abrirModalReubicacion(excedentesRestantes, newCant);
+        alert(`Aún quedan ${excedentesRestantes.length} alumno(s) por reubicar o consensuar en horarios disponibles.`);
+      } else {
+        await window.PKStore.actualizarCamasDefault(newCant, true);
+        const lbl = document.getElementById('lblCamasEstudioAdmin');
+        if (lbl) lbl.innerText = `${newCant} Camas`;
+        cerrarModalReubicacion();
+        alert(`¡Excelente! Todas las reubicaciones fueron acordadas con los profesionales y alumnos. La capacidad del estudio se actualizó a ${newCant} camas Reformer.`);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    // ==========================================
+    // 3. GRILLA SEMANAL SIGUEFIT & MODAL DETALLE
+    // ==========================================
+    function setAdminTurnosView(view) {
+      adminTurnosView = view;
+      const btnGrilla = document.getElementById('btnViewAdminGrilla');
+      const btnLista = document.getElementById('btnViewAdminLista');
+      if (btnGrilla && btnLista) {
+        if (view === 'grilla') {
+          btnGrilla.className = 'px-3 py-1.5 bg-pk-purple text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5';
+          btnLista.className = 'px-3 py-1.5 bg-white text-slate-700 hover:text-pk-purple text-xs font-bold rounded-lg border border-slate-200 transition flex items-center gap-1.5';
+        } else {
+          btnLista.className = 'px-3 py-1.5 bg-pk-purple text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5';
+          btnGrilla.className = 'px-3 py-1.5 bg-white text-slate-700 hover:text-pk-purple text-xs font-bold rounded-lg border border-slate-200 transition flex items-center gap-1.5';
+        }
+      }
+      renderAdminTurnos();
+    }
+
+    function seleccionarDiaAdminPill(dia) {
+      filtroDiaAdmin = dia;
+      const sel = document.getElementById('selectFiltroDiaAdmin');
+      if (sel) sel.value = dia;
+
+      document.querySelectorAll('.pill-admin-dia').forEach(p => {
+        p.className = 'pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200';
+      });
+      const activePill = document.getElementById('pillAdminDia_' + dia);
+      if (activePill) {
+        activePill.className = 'pill-admin-dia px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap bg-pk-purple text-white shadow-xs';
+      }
+      renderAdminTurnos();
+    }
+
+    function onSelectFiltroDiaAdminChange(dia) {
+      seleccionarDiaAdminPill(dia);
+    }
+
+    function onSelectFiltroProfeAdminChange(profeId) {
+      filtroProfeAdmin = profeId;
+      renderAdminTurnos();
+    }
+
+    function renderAdminTurnos() {
+      const container = document.getElementById('gridAdminTurnos');
+      if (!container) return;
+
+      let list = window.PKStore.turnos;
+      if (filtroProfeAdmin !== 'todos') {
+        list = list.filter(t => t.profesorId === parseInt(filtroProfeAdmin));
+      }
+
+      // VISTA GRILLA SEMANAL (ESTILO SIGUEFIT)
+      if (adminTurnosView === 'grilla') {
+        const diasSemana = filtroDiaAdmin === 'todos' 
+          ? ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] 
+          : [filtroDiaAdmin];
+
+        const columnasHTML = diasSemana.map(dia => {
+          const turnosDelDia = list.filter(t => t.dia === dia);
+          const totalCamasLibresDia = turnosDelDia.reduce((acc, t) => acc + (t.cupoMax - t.inscriptos.length), 0);
+
+          const turnosCardsHTML = turnosDelDia.map(t => {
+            const ocupados = t.inscriptos.length;
+            const libres = t.cupoMax - ocupados;
+            const estaLleno = libres <= 0;
+            const profe = window.PKStore.profesionales.find(p => p.id === t.profesorId);
+
+            // Puntos / Indicador de Camas Reformer
+            let dotsCamas = '';
+            for (let i = 0; i < t.cupoMax; i++) {
+              if (i < ocupados) {
+                dotsCamas += `<span class="w-2.5 h-2.5 rounded-full bg-pk-purple inline-block shadow-2xs" title="Cama ${i+1}: ${t.inscriptos[i]}"></span>`;
+              } else {
+                dotsCamas += `<span class="w-2.5 h-2.5 rounded-full bg-emerald-200 border border-emerald-400 inline-block" title="Cama ${i+1}: Libre"></span>`;
+              }
+            }
+
+            // Badge de Ocupación
+            let badgeCupo = '';
+            if (estaLleno) {
+              badgeCupo = `<span class="px-2 py-0.5 bg-rose-500 text-white font-black text-[9px] rounded-md uppercase tracking-wider"><i class="fa-solid fa-lock mr-0.5"></i>Completo</span>`;
+            } else if (libres === 1) {
+              badgeCupo = `<span class="px-2 py-0.5 bg-amber-500 text-white font-extrabold text-[9px] rounded-md animate-pulse">1 Cama</span>`;
+            } else {
+              badgeCupo = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-extrabold text-[9px] rounded-md">${ocupados}/${t.cupoMax} ocupadas</span>`;
+            }
+
+            // Chips con nombres de alumnos designados
+            let alumnosTexto = '';
+            if (ocupados > 0) {
+              const maxNombres = 2;
+              const primeros = t.inscriptos.slice(0, maxNombres).join(', ');
+              alumnosTexto = `
+                <div class="text-[10px] text-slate-700 font-semibold truncate mt-1 flex items-center gap-1">
+                  <i class="fa-solid fa-users text-pk-purple text-[9px]"></i>
+                  <span>${primeros}${ocupados > maxNombres ? ` <b class="text-pk-purple">(+${ocupados - maxNombres})</b>` : ''}</span>
+                </div>
+              `;
+            } else {
+              alumnosTexto = `
+                <div class="text-[10px] text-slate-400 italic mt-1 flex items-center gap-1">
+                  <i class="fa-solid fa-bed text-emerald-500 text-[9px]"></i>
+                  <span>Sin alumnos (Todas libres)</span>
+                </div>
+              `;
+            }
+
+            return `
+              <div onclick="abrirModalDetalleTurno(${t.id})" class="turno-grid-item bg-white p-3 rounded-2xl border ${estaLleno ? 'border-rose-200 hover:border-rose-400' : 'border-slate-200 hover:border-pk-purple'} shadow-xs hover:shadow-md transition cursor-pointer space-y-2 group">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-slate-900 group-hover:text-pk-purple transition flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-slate-400 text-[10px]"></i> ${t.hora} hs
+                  </span>
+                  ${badgeCupo}
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] text-slate-500">
+                  <span class="truncate font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-user-doctor text-pk-teal text-[10px]"></i>
+                    ${profe ? profe.nombre.replace('Lic. ', '') : 'Kinesiólogo'}
+                  </span>
+                  <span class="text-[10px] font-bold text-slate-400">${libres} libres</span>
+                </div>
+
+                <!-- Puntos de camas -->
+                <div class="flex items-center gap-1 pt-1 border-t border-slate-100">
+                  ${dotsCamas}
+                </div>
+
+                ${alumnosTexto}
+
+                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-pk-purple group-hover:translate-x-0.5 transition">
+                  <span>Ver alumnos / Anotarme</span>
+                  <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="columna-dia-card bg-slate-50 rounded-2xl p-3 border border-slate-200 flex flex-col space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div>
+                  <h4 class="font-black text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-regular fa-calendar text-pk-purple"></i> ${dia}
+                  </h4>
+                  <span class="text-[10px] text-slate-400 font-semibold">${turnosDelDia.length} horarios</span>
+                </div>
+                <span class="text-[10px] font-bold bg-white text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+                  ${totalCamasLibresDia} camas libres
+                </span>
+              </div>
+
+              <div class="space-y-2.5 flex-1">
+                ${turnosCardsHTML.length > 0 ? turnosCardsHTML : '<p class="text-xs text-slate-400 italic text-center py-4">Sin turnos en este día</p>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (filtroDiaAdmin === 'todos') {
+          container.innerHTML = `
+            <div class="grid-semanal-wrapper">
+              <div class="grid grid-cols-5 gap-3.5 min-w-[1100px] w-full">
+                ${columnasHTML}
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="max-w-2xl mx-auto py-2">
+              ${columnasHTML}
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // VISTA LISTA DETALLADA
+      container.innerHTML = list.map(t => {
+        const profe = window.PKStore.profesionales.find(p => p.id === t.profesorId);
+        const camasHTML = [];
+        for (let i = 0; i < t.cupoMax; i++) {
+          const alumno = t.inscriptos[i];
+          if (alumno) {
+            camasHTML.push(`
+              <div class="flex items-center justify-between bg-purple-50 p-2 rounded-lg border border-purple-200 text-xs">
+                <span class="font-bold text-pk-purple flex items-center gap-1.5">
+                  <i class="fa-solid fa-bed"></i> Cama ${i + 1}: ${alumno}
+                </span>
+                <button onclick="liberarCamaDesdeModal(${t.id}, '${alumno}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs" title="Liberar cama">
+                  <i class="fa-solid fa-xmark"></i> Liberar
+                </button>
+              </div>
+            `);
+          } else {
+            camasHTML.push(`
+              <div class="flex items-center justify-between bg-emerald-50/50 p-2 rounded-lg border border-dashed border-emerald-200 text-xs text-emerald-700">
+                <span class="font-semibold"><i class="fa-solid fa-bed mr-1"></i> Cama ${i + 1}: Libre</span>
+                <span class="text-[10px] bg-emerald-100 px-2 py-0.5 rounded font-bold">Disponible</span>
+              </div>
+            `);
+          }
+        }
+
+        return `
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 mb-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-pk-purple text-white text-[10px] font-extrabold rounded">${t.dia}</span>
+                <span class="text-xs font-black text-slate-900">${t.hora} hs</span>
+              </div>
+              <span class="text-xs font-bold text-pk-teal flex items-center gap-1">
+                <i class="fa-solid fa-bed"></i> ${t.cupoMax} Camas
+              </span>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-black text-slate-900">${t.tipo}</h4>
+              <p class="text-xs text-slate-500 font-medium">A cargo: <b class="text-slate-800">${profe ? profe.nombre : 'Kinesiólogo'}</b> (${profe?.matricula || 'MP'})</p>
+            </div>
+
+            <div class="space-y-1.5 bg-white p-3 rounded-xl border border-slate-200">
+              <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">
+                Ocupación de Camas (${t.inscriptos.length} de ${t.cupoMax} asignadas):
+              </span>
+              ${camasHTML.join('')}
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+              <button onclick="abrirModalDetalleTurno(${t.id})" class="px-3 py-1.5 bg-pk-purple hover:bg-pk-purpleDark text-white text-xs font-bold rounded-lg transition flex items-center gap-1">
+                <i class="fa-solid fa-eye"></i> Ver Alumnos / Gestionar
+              </button>
+              <button onclick="editarTurnoModal(${t.id})" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-lg transition flex items-center gap-1">
+                <i class="fa-solid fa-pen-to-square"></i> Modificar
+              </button>
+              <button onclick="eliminarTurnoClick(${t.id})" class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold rounded-lg transition flex items-center gap-1">
+                <i class="fa-regular fa-trash-can"></i> Baja
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal Detalle de Turno (SigueFit Style: Clic en el turno abre ventana con los alumnos designados)
+    function abrirModalDetalleTurno(turnoId) {
+      _selectedTurnoIdDetalle = turnoId;
+      const turno = window.PKStore.turnos.find(t => t.id === turnoId);
+      if (!turno) return;
+
+      const profe = window.PKStore.profesionales.find(p => p.id === turno.profesorId);
+      const ocupados = turno.inscriptos.length;
+      const libres = turno.cupoMax - ocupados;
+      const pct = Math.round((ocupados / turno.cupoMax) * 100);
+
+      document.getElementById('detTurnoDia').innerText = turno.dia.toUpperCase();
+      document.getElementById('detTurnoHora').innerHTML = `<i class="fa-regular fa-clock text-pk-purple text-xs"></i> ${turno.hora} hs`;
+      document.getElementById('detTurnoTitulo').innerText = turno.tipo;
+      document.getElementById('detTurnoProfe').innerHTML = `
+        <i class="fa-solid fa-user-doctor text-pk-teal"></i>
+        A cargo: <b class="text-slate-800">${profe ? profe.nombre : 'Kinesiólogo'}</b> (${profe?.matricula || 'MP'}) • ${profe?.especialidad || 'Pilates Kinésico'}
+      `;
+
+      const badgeEstado = document.getElementById('detTurnoBadgeEstado');
+      if (libres <= 0) {
+        badgeEstado.innerHTML = `<span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-full text-[10px]"><i class="fa-solid fa-lock mr-1"></i>Completo</span>`;
+      } else {
+        badgeEstado.innerHTML = `<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[10px]"><i class="fa-solid fa-bed mr-1"></i>${libres} libres</span>`;
+      }
+
+      document.getElementById('detOcupacionTexto').innerHTML = `<i class="fa-solid fa-bed text-pk-purple"></i> Ocupación: ${ocupados} de ${turno.cupoMax} camas ocupadas`;
+      document.getElementById('detOcupacionPorcentaje').innerText = `${pct}%`;
+      document.getElementById('detBarraProgreso').style.width = `${pct}%`;
+      document.getElementById('detTotalInscriptos').innerText = `${ocupados} inscriptos / ${libres} disponibles`;
+
+      const detCupo = document.getElementById('detCupoMaxTurno');
+      if (detCupo) detCupo.innerText = `${turno.cupoMax} Camas`;
+
+      // Render camas 1 a N
+      const listaCamasCont = document.getElementById('detListaCamas');
+      const camasRows = [];
+
+      for (let i = 0; i < turno.cupoMax; i++) {
+        const alumnoNombre = turno.inscriptos[i];
+        if (alumnoNombre) {
+          const alumnoObj = window.PKStore.alumnos.find(a => a.nombre.toLowerCase() === alumnoNombre.toLowerCase());
+          const tel = alumnoObj ? alumnoObj.telefono : '';
+          const msgWA = encodeURIComponent(`¡Hola ${alumnoNombre}! Te escribimos de PILATES KINÉSICO con respecto a tu clase de los ${turno.dia} a las ${turno.hora} hs.`);
+          const esHabilitado = alumnoObj ? (alumnoObj.habilitado !== false) : true;
+          const badgeHab = esHabilitado 
+            ? `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-md flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Habilitado</span>`
+            : `<span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md flex items-center gap-1"><i class="fa-solid fa-circle-pause text-[9px]"></i> En Pausa</span>`;
+          const badgeDeuda = (alumnoObj && alumnoObj.estado === 'atrasado')
+            ? `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-md">Adeuda</span>`
+            : '';
+
+          camasRows.push(`
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-2xl border ${esHabilitado ? 'border-purple-200 bg-purple-50/40' : 'border-amber-200 bg-amber-50/30'} gap-2">
+              <div class="flex items-center gap-3">
+                <span class="w-7 h-7 rounded-full bg-pk-purple text-white flex items-center justify-center font-black text-xs shadow-2xs shrink-0">
+                  ${i + 1}
+                </span>
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h5 class="text-xs font-black text-slate-900">${alumnoNombre}</h5>
+                    ${alumnoObj?.dni ? `<span class="text-[10px] text-slate-500 font-medium">DNI: ${alumnoObj.dni}</span>` : ''}
+                    ${badgeHab}
+                    ${badgeDeuda}
+                  </div>
+                  <p class="text-[10px] text-slate-500 mt-0.5">
+                    ${alumnoObj?.patologias ? `Patología: <i>${alumnoObj.patologias}</i> • ` : ''}
+                    <span class="font-medium text-slate-600">${alumnoObj?.plan || alumnoObj?.obraSocial || 'Pilates Kinésico'}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                ${tel ? `
+                  <a href="https://wa.me/${tel.replace(/\D/g, '')}?text=${msgWA}" target="_blank" class="p-1.5 text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg text-xs font-bold transition flex items-center gap-1" title="Enviar WhatsApp al alumno">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span class="text-[10px] hidden sm:inline">WhatsApp</span>
+                  </a>
+                ` : ''}
+                <button onclick="liberarCamaDesdeModal(${turno.id}, '${alumnoNombre}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-lg border border-rose-200 transition flex items-center gap-1 cursor-pointer" title="Liberar esta cama">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                  <span>Liberar</span>
+                </button>
+              </div>
+            </div>
+          `);
+        } else {
+          camasRows.push(`
+            <div class="flex items-center justify-between p-3 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/30">
+              <div class="flex items-center gap-3 text-slate-500">
+                <span class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center font-bold text-xs shrink-0">
+                  ${i + 1}
+                </span>
+                <div>
+                  <h5 class="text-xs font-bold text-emerald-800">Cama Reformer ${i + 1}: Disponible</h5>
+                  <p class="text-[10px] text-emerald-600">Cupo libre para alumno habilitado o nuevo registro</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-md">Libre</span>
+            </div>
+          `);
+        }
+      }
+      listaCamasCont.innerHTML = camasRows.join('');
+
+      // Formulario de Asignación Conectado con el Padrón Central
+      const accionesCont = document.getElementById('detSeccionAcciones');
+      if (libres > 0) {
+        const alumnosPadron = [...window.PKStore.alumnos].sort((a,b) => a.nombre.localeCompare(b.nombre));
+        const padronOptions = alumnosPadron.map(a => {
+          const estaInscripto = turno.inscriptos.some(n => n.toLowerCase() === a.nombre.toLowerCase());
+          const estadoTxt = a.habilitado === false ? ' [PAUSADO/INHABILITADO]' : '';
+          const dniTxt = a.dni ? ` (DNI ${a.dni})` : '';
+          const disTxt = estaInscripto ? ' disabled' : '';
+          const inscriptoTxt = estaInscripto ? ' • (Ya inscripto en este horario)' : '';
+          return `<option value="${a.id}" ${disTxt}>${a.nombre}${dniTxt}${estadoTxt}${inscriptoTxt}</option>`;
+        }).join('');
+
+        accionesCont.innerHTML = `
+          <div class="w-full space-y-2.5 bg-slate-50 p-3 sm:p-4 rounded-2xl border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-user-plus text-pk-purple"></i> Asignar Cama a Alumno:
+              </span>
+              <span class="text-[10px] text-pk-purple font-bold">${window.PKStore.alumnos.length} alumnos registrados en el Padrón</span>
+            </div>
+
+            <!-- Selector Rápido desde el Padrón -->
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Buscar y Seleccionar Alumno Registrado:</label>
+              <select id="selectAlumnoPadronRapido" onchange="alSeleccionarAlumnoPadron(this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-pk-purple shadow-2xs">
+                <option value="">-- Seleccionar Alumno del Padrón Central --</option>
+                ${padronOptions}
+                <option value="__nuevo__">➕ Inscribir Alumno Nuevo...</option>
+              </select>
+            </div>
+
+            <!-- Formulario de Confirmación y Carga -->
+            <form onsubmit="asignarAlumnoRapidoSubmit(event, ${turno.id})" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input type="text" id="inputAsignarRapidoNombre" required placeholder="Nombre y Apellido del alumno..." class="text-xs bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple flex-1 shadow-2xs font-medium">
+              <input type="tel" id="inputAsignarRapidoTel" placeholder="WhatsApp (549388...)" class="text-xs bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-pk-purple sm:w-36 shadow-2xs font-medium">
+              <button type="submit" class="px-4 py-2 bg-pk-purple hover:bg-pk-purpleDark text-white text-xs font-bold rounded-xl whitespace-nowrap shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-check"></i> Asignar Cama
+              </button>
+            </form>
+            <div id="detAvisoHabilitacionRapida" class="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-xl border border-amber-200 hidden"></div>
+          </div>
+        `;
+      } else {
+        accionesCont.innerHTML = `
+          <div class="w-full text-center py-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500 font-semibold flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bed text-slate-400"></i>
+            Todas las camas (${turno.cupoMax}) de este horario están completas. Para agregar alumnos, incrementa el cupo de camas.
+          </div>
+        `;
+      }
+
+      document.getElementById('modalDetalleTurno').classList.remove('hidden');
+    }
+
+    function alSeleccionarAlumnoPadron(val) {
+      const inputNombre = document.getElementById('inputAsignarRapidoNombre');
+      const inputTel = document.getElementById('inputAsignarRapidoTel');
+      const aviso = document.getElementById('detAvisoHabilitacionRapida');
+      if (!inputNombre || !inputTel) return;
+
+      if (!val) {
+        inputNombre.value = '';
+        inputTel.value = '';
+        if (aviso) aviso.classList.add('hidden');
+        return;
+      }
+
+      if (val === '__nuevo__') {
+        inputNombre.value = '';
+        inputTel.value = '';
+        inputNombre.placeholder = 'Escribe nombre y apellido del nuevo alumno...';
+        inputNombre.focus();
+        if (aviso) aviso.classList.add('hidden');
+        return;
+      }
+
+      const alumno = window.PKStore.alumnos.find(a => a.id === parseInt(val));
+      if (alumno) {
+        inputNombre.value = alumno.nombre;
+        inputTel.value = alumno.telefono || '';
+        if (aviso) {
+          if (alumno.habilitado === false) {
+            aviso.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> <b>Nota:</b> ${alumno.nombre} está actualmente marcado como <i>Inhabilitado / En Pausa</i> en el padrón. Al asignarlo a este turno se registrará y se habilitará para la clase.`;
+            aviso.classList.remove('hidden');
+          } else {
+            aviso.classList.add('hidden');
+          }
+        }
+      }
+    }
+
+    function cerrarModalDetalleTurno() {
+      document.getElementById('modalDetalleTurno').classList.add('hidden');
+      _selectedTurnoIdDetalle = null;
+    }
+
+    async function liberarCamaDesdeModal(turnoId, alumnoNombre) {
+      if (confirm(`¿Liberar la cama de ${alumnoNombre} en este turno?`)) {
+        await window.PKStore.liberarCupoAlumno(turnoId, alumnoNombre);
+        abrirModalDetalleTurno(turnoId);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    async function asignarAlumnoRapidoSubmit(e, turnoId) {
+      e.preventDefault();
+      const inputNombre = document.getElementById('inputAsignarRapidoNombre');
+      const inputTel = document.getElementById('inputAsignarRapidoTel');
+      const nombre = inputNombre ? inputNombre.value.trim() : '';
+      const tel = inputTel ? inputTel.value.trim() : '';
+      if (!nombre) return;
+
+      // Si el alumno seleccionado estaba inhabilitado en el padrón, lo habilitamos
+      const alumnoExistente = window.PKStore.alumnos.find(a => a.nombre.toLowerCase() === nombre.toLowerCase());
+      if (alumnoExistente && alumnoExistente.habilitado === false) {
+        await window.PKStore.actualizarAlumno(alumnoExistente.id, { habilitado: true });
+      }
+
+      const res = await window.PKStore.asignarCupoAlumno(turnoId, nombre, tel);
+      if (res.ok) {
+        abrirModalDetalleTurno(turnoId);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      } else {
+        alert(res.msg);
+      }
+    }
+
+    // Modal Crear / Editar Turno Manualmente
+    function abrirModalTurno() {
+      document.getElementById('modalTurnoEditId').value = '';
+      document.getElementById('modalTurnoTitulo').innerText = 'Nuevo Horario de Turno (Alta)';
+      document.getElementById('turnoHora').value = '';
+      document.getElementById('turnoTipo').value = 'Pilates Kinésico';
+      document.getElementById('turnoCupoMax').value = window.PKStore.configuracion.camasDefault || 6;
+      document.getElementById('modalTurno').classList.remove('hidden');
+    }
+
+    function editarTurnoModal(id) {
+      const turno = window.PKStore.turnos.find(t => t.id === id);
+      if (!turno) return;
+      document.getElementById('modalTurnoEditId').value = turno.id;
+      document.getElementById('modalTurnoTitulo').innerText = 'Modificar Horario y Camas';
+      document.getElementById('turnoDia').value = turno.dia;
+      document.getElementById('turnoHora').value = turno.hora;
+      document.getElementById('turnoProfeId').value = turno.profesorId;
+      document.getElementById('turnoTipo').value = turno.tipo;
+      document.getElementById('turnoCupoMax').value = turno.cupoMax;
+      document.getElementById('modalTurno').classList.remove('hidden');
+    }
+
+    function cerrarModalTurno() {
+      document.getElementById('modalTurno').classList.add('hidden');
+    }
+
+    async function guardarTurnoSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('modalTurnoEditId').value;
+      const datos = {
+        dia: document.getElementById('turnoDia').value,
+        hora: document.getElementById('turnoHora').value.trim(),
+        profesorId: parseInt(document.getElementById('turnoProfeId').value),
+        tipo: document.getElementById('turnoTipo').value.trim(),
+        cupoMax: parseInt(document.getElementById('turnoCupoMax').value)
+      };
+
+      if (id) {
+        await window.PKStore.actualizarTurno(id, datos);
+      } else {
+        await window.PKStore.crearTurno(datos);
+      }
+
+      cerrarModalTurno();
+      renderAdminDashboard();
+      onCambioProfeAlumno();
+    }
+
+    async function eliminarTurnoClick(id) {
+      if (confirm('¿Eliminar este horario de clases?')) {
+        await window.PKStore.eliminarTurno(id);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    // ==========================================
+    // 4. RESTO DEL PANEL DE ADMINISTRACIÓN (ABM)
+    // ==========================================
+    let _filtroPadronEstado = 'todos';
+    let _filtroPadronTexto = '';
+    let _filtroPadronProfe = 'todos';
+
+    function setTabProfesor(tab) {
+      document.getElementById('subTabAlumnos').classList.toggle('hidden', tab !== 'alumnos');
+      document.getElementById('subTabTurnos').classList.toggle('hidden', tab !== 'turnos');
+      document.getElementById('subTabProfesores').classList.toggle('hidden', tab !== 'profesores');
+      document.getElementById('subTabPromociones').classList.toggle('hidden', tab !== 'promociones');
+
+      ['Alumnos', 'Turnos', 'Profesores', 'Promos'].forEach(t => {
+        const btn = document.getElementById('tabBtn' + t);
+        if (t.toLowerCase() === tab.toLowerCase() || (t === 'Promos' && tab === 'promociones')) {
+          btn.className = 'px-5 py-3 text-xs font-bold border-b-2 border-pk-purple text-pk-purple bg-white flex items-center gap-2 whitespace-nowrap';
+        } else {
+          btn.className = 'px-5 py-3 text-xs font-bold border-b-2 border-transparent text-slate-600 hover:text-pk-purple flex items-center gap-2 whitespace-nowrap';
+        }
+      });
+    }
+
+    function renderAdminDashboard() {
+      const alumnos = window.PKStore.alumnos;
+      const profes = window.PKStore.profesionales;
+
+      const alDia = alumnos.filter(a => a.estado === 'al_dia').length;
+      const atrasados = alumnos.filter(a => a.estado === 'atrasado').length;
+
+      document.getElementById('kpiAlumnosTotales').innerText = alumnos.length;
+      document.getElementById('kpiProfesTotales').innerText = profes.length;
+      document.getElementById('kpiAlumnosAlDia').innerText = alDia;
+      document.getElementById('kpiAlumnosAtrasados').innerText = atrasados;
+
+      renderAdminAlumnos();
+      renderAdminTurnos();
+      renderAdminProfesores();
+      renderAdminPromos();
+    }
+
+    // ==========================================
+    // PADRÓN CENTRAL DE ALUMNOS & FILTROS
+    // ==========================================
+    function setFiltroPadron(filtro) {
+      _filtroPadronEstado = filtro;
+      
+      const botones = ['todos', 'habilitados', 'inhabilitados', 'al_dia', 'por_vencer', 'atrasado'];
+      botones.forEach(b => {
+        const btn = document.getElementById('btnFiltro_' + b);
+        if (!btn) return;
+        if (b === filtro) {
+          btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-900 text-white flex items-center gap-1.5 transition shadow-xs';
+        } else {
+          btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 flex items-center gap-1.5 transition';
+        }
+      });
+
+      renderAdminAlumnos();
+    }
+
+    function filtrarAlumnosPadrón() {
+      const input = document.getElementById('inputBuscarAlumno');
+      const selectProfe = document.getElementById('selectFiltroProfeAlumno');
+      const btnLimpiar = document.getElementById('btnLimpiarBusquedaAlumno');
+
+      _filtroPadronTexto = input ? input.value.trim().toLowerCase() : '';
+      _filtroPadronProfe = selectProfe ? selectProfe.value : 'todos';
+
+      if (btnLimpiar) {
+        btnLimpiar.classList.toggle('hidden', !_filtroPadronTexto);
+      }
+
+      renderAdminAlumnos();
+    }
+
+    function limpiarBusquedaAlumno() {
+      const input = document.getElementById('inputBuscarAlumno');
+      const btnLimpiar = document.getElementById('btnLimpiarBusquedaAlumno');
+      const selectProfe = document.getElementById('selectFiltroProfeAlumno');
+
+      if (input) input.value = '';
+      if (btnLimpiar) btnLimpiar.classList.add('hidden');
+      if (selectProfe) selectProfe.value = 'todos';
+
+      _filtroPadronTexto = '';
+      _filtroPadronProfe = 'todos';
+      renderAdminAlumnos();
+    }
+
+    async function toggleHabilitacionAlumnoClick(id) {
+      const alumno = window.PKStore.alumnos.find(a => a.id === id);
+      if (!alumno) return;
+      const estadoActual = (alumno.habilitado !== false);
+      const accion = estadoActual ? 'inhabilitar (pausar)' : 'habilitar';
+      
+      if (confirm(`¿Confirmas ${accion} a ${alumno.nombre} en el Padrón?`)) {
+        await window.PKStore.toggleHabilitacionAlumno(id);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    function renderAdminAlumnos() {
+      const tbody = document.getElementById('tbodyAlumnos');
+      const cardsCont = document.getElementById('cardsAlumnosMobile');
+      const emptyState = document.getElementById('alumnosEmptyState');
+      const allAlumnos = window.PKStore.alumnos;
+
+      // Actualizar contadores de las pestañas
+      const countTodos = allAlumnos.length;
+      const countHab = allAlumnos.filter(a => a.habilitado !== false).length;
+      const countInhab = allAlumnos.filter(a => a.habilitado === false).length;
+      const countAlDia = allAlumnos.filter(a => a.estado === 'al_dia').length;
+      const countPorVencer = allAlumnos.filter(a => a.estado === 'por_vencer').length;
+      const countDeuda = allAlumnos.filter(a => a.estado === 'atrasado').length;
+
+      if (document.getElementById('badgeCount_todos')) document.getElementById('badgeCount_todos').innerText = countTodos;
+      if (document.getElementById('badgeCount_habilitados')) document.getElementById('badgeCount_habilitados').innerText = countHab;
+      if (document.getElementById('badgeCount_inhabilitados')) document.getElementById('badgeCount_inhabilitados').innerText = countInhab;
+      if (document.getElementById('badgeCount_al_dia')) document.getElementById('badgeCount_al_dia').innerText = countAlDia;
+      if (document.getElementById('badgeCount_por_vencer')) document.getElementById('badgeCount_por_vencer').innerText = countPorVencer;
+      if (document.getElementById('badgeCount_atrasado')) document.getElementById('badgeCount_atrasado').innerText = countDeuda;
+
+      // Aplicar filtros
+      let list = allAlumnos.filter(a => {
+        // Filtro por Estado / Habilitación
+        if (_filtroPadronEstado === 'habilitados' && a.habilitado === false) return false;
+        if (_filtroPadronEstado === 'inhabilitados' && a.habilitado !== false) return false;
+        if (_filtroPadronEstado === 'al_dia' && a.estado !== 'al_dia') return false;
+        if (_filtroPadronEstado === 'por_vencer' && a.estado !== 'por_vencer') return false;
+        if (_filtroPadronEstado === 'atrasado' && a.estado !== 'atrasado') return false;
+
+        // Filtro por Kinesiólogo
+        if (_filtroPadronProfe !== 'todos') {
+          if (a.kinesiologo !== _filtroPadronProfe) return false;
+        }
+
+        // Filtro por Texto de Búsqueda
+        if (_filtroPadronTexto) {
+          const matchNombre = (a.nombre || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchDni = (a.dni || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchTel = (a.telefono || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchPat = (a.patologias || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchOS = (a.obraSocial || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchCarnet = (a.carnetObraSocial || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchProfe = (a.kinesiologo || '').toLowerCase().includes(_filtroPadronTexto);
+          const matchObs = (a.observaciones || '').toLowerCase().includes(_filtroPadronTexto);
+          if (!matchNombre && !matchDni && !matchTel && !matchPat && !matchOS && !matchCarnet && !matchProfe && !matchObs) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', list.length > 0);
+      }
+
+      // 1. RENDER VISTA TABLA (DESKTOP)
+      if (tbody) {
+        tbody.innerHTML = list.map(a => {
+          const esHabilitado = (a.habilitado !== false);
+          const badgeHab = esHabilitado
+            ? `<button onclick="toggleHabilitacionAlumnoClick(${a.id})" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold rounded-full text-[10px] flex items-center gap-1 transition cursor-pointer" title="Habilitado para clases. Clic para pausar"><i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i> Habilitado</button>`
+            : `<button onclick="toggleHabilitacionAlumnoClick(${a.id})" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-full text-[10px] flex items-center gap-1 transition cursor-pointer" title="En pausa/inhabilitado. Clic para habilitar"><i class="fa-solid fa-circle-pause text-amber-600 text-xs"></i> En Pausa</button>`;
+
+          let badgeEstado = '';
+          if (a.estado === 'al_dia') {
+            badgeEstado = `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[10px] flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Al Día</span>`;
+          } else if (a.estado === 'por_vencer') {
+            badgeEstado = `<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-[10px] flex items-center gap-1"><i class="fa-solid fa-clock text-[9px]"></i> Por Vencer</span>`;
+          } else {
+            badgeEstado = `<span class="px-2.5 py-1 bg-rose-100 text-rose-800 font-bold rounded-full text-[10px] flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Atrasado ($${(a.deuda || a.montoMensual).toLocaleString('es-AR')})</span>`;
+          }
+
+          // Encontrar turnos donde está inscripto
+          const turnosAsignados = window.PKStore.turnos.filter(t => t.inscriptos.some(n => n.toLowerCase() === a.nombre.toLowerCase()));
+          const turnosBadges = turnosAsignados.length > 0 
+            ? turnosAsignados.map(t => `<span class="px-2 py-0.5 bg-purple-50 text-pk-purple border border-purple-200 rounded-md text-[10px] font-bold whitespace-nowrap inline-block mr-1 mb-1">${t.dia.substring(0,3)} ${t.hora.split('-')[0].trim()} hs</span>`).join('')
+            : `<span class="text-slate-400 italic text-[10px]">Sin turnos asignados</span>`;
+
+          const msgRecordatorio = encodeURIComponent(
+            `¡Hola ${a.nombre}! Te escribimos de PK Pilates Kinésico para recordarte cordialmente sobre tu cuota mensual ($${(a.montoMensual || 50000).toLocaleString('es-AR')}). Podés transferir al Alias o consultar por aquí. ¡Muchas gracias!`
+          );
+
+          return `
+            <tr class="hover:bg-slate-50/80 transition">
+              <td class="p-3.5">
+                <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                  ${a.nombre}
+                  ${a.grupoEtario === 'adulto_mayor' ? '<span class="px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[9px] font-bold rounded">Senior 60+</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                  <span>DNI: <b>${a.dni || 'Sin DNI'}</b></span>
+                  <span>•</span>
+                  <span>Tel: <b>${a.telefono}</b></span>
+                </div>
+              </td>
+              <td class="p-3.5">
+                ${badgeHab}
+              </td>
+              <td class="p-3.5">
+                <div class="text-slate-700 font-medium text-[11px]">${a.patologias || 'Sin patologías registradas'}</div>
+                ${a.observaciones ? `<div class="text-[10px] text-slate-500 italic mt-0.5 line-clamp-1" title="${a.observaciones}">Nota: ${a.observaciones}</div>` : ''}
+              </td>
+              <td class="p-3.5">
+                <div class="text-slate-800 font-bold text-[11px]">${a.obraSocial || 'Particular'}</div>
+                ${a.carnetObraSocial ? `<span class="text-[10px] text-slate-500">Carnet: <b>${a.carnetObraSocial}</b></span>` : ''}
+                <div class="text-[10px] text-pk-purple font-semibold">A cargo: ${a.kinesiologo || 'Lic. Gustavo Moyano'}</div>
+              </td>
+              <td class="p-3.5 max-w-[200px]">
+                <div class="flex flex-wrap items-center">
+                  ${turnosBadges}
+                </div>
+              </td>
+              <td class="p-3.5">
+                <div class="font-bold text-slate-900">$${(a.montoMensual || 50000).toLocaleString('es-AR')}</div>
+                <div class="mt-0.5">${badgeEstado}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Vence: ${a.vencimiento}</div>
+              </td>
+              <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+                ${a.estado !== 'al_dia' 
+                  ? `<button onclick="registrarPagoClick(${a.id})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-bold transition shadow-2xs" title="Registrar Cobro"><i class="fa-solid fa-check"></i> Cobrado</button>` 
+                  : ''}
+                <a href="https://wa.me/${a.telefono.replace(/\D/g, '')}?text=${msgRecordatorio}" target="_blank" class="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold inline-flex items-center justify-center transition border border-emerald-200" title="Avisar por WhatsApp">
+                  <i class="fa-brands fa-whatsapp text-sm"></i>
+                </a>
+                <button onclick="editarAlumnoModal(${a.id})" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition border border-slate-200" title="Editar Ficha"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="eliminarAlumnoClick(${a.id})" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition border border-rose-200" title="Dar de Baja"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. RENDER VISTA TARJETAS (MÓVIL < 768px)
+      if (cardsCont) {
+        cardsCont.innerHTML = list.map(a => {
+          const esHabilitado = (a.habilitado !== false);
+          const badgeHab = esHabilitado
+            ? `<button onclick="toggleHabilitacionAlumnoClick(${a.id})" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold rounded-full text-[10px] flex items-center gap-1 transition" title="Habilitado. Toca para pausar"><i class="fa-solid fa-circle-check text-emerald-600"></i> Habilitado</button>`
+            : `<button onclick="toggleHabilitacionAlumnoClick(${a.id})" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-full text-[10px] flex items-center gap-1 transition" title="Pausado. Toca para habilitar"><i class="fa-solid fa-circle-pause text-amber-600"></i> En Pausa</button>`;
+
+          let badgeEstado = '';
+          if (a.estado === 'al_dia') {
+            badgeEstado = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[10px]">🟢 Al Día</span>`;
+          } else if (a.estado === 'por_vencer') {
+            badgeEstado = `<span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full text-[10px]">🟡 Por Vencer</span>`;
+          } else {
+            badgeEstado = `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-bold rounded-full text-[10px]">🔴 Atrasado ($${(a.deuda || a.montoMensual).toLocaleString('es-AR')})</span>`;
+          }
+
+          const turnosAsignados = window.PKStore.turnos.filter(t => t.inscriptos.some(n => n.toLowerCase() === a.nombre.toLowerCase()));
+          const turnosBadges = turnosAsignados.length > 0
+            ? turnosAsignados.map(t => `<span class="px-2 py-0.5 bg-purple-50 text-pk-purple border border-purple-200 rounded-md text-[10px] font-bold mr-1">${t.dia.substring(0,3)} ${t.hora.split('-')[0].trim()} hs</span>`).join('')
+            : `<span class="text-slate-400 italic text-[10px]">Sin turnos asignados</span>`;
+
+          const msgRecordatorio = encodeURIComponent(
+            `¡Hola ${a.nombre}! Te escribimos de PK Pilates Kinésico para recordarte sobre tu cuota mensual ($${(a.montoMensual || 50000).toLocaleString('es-AR')}).`
+          );
+
+          return `
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                    ${a.nombre}
+                    ${a.grupoEtario === 'adulto_mayor' ? '<span class="px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[9px] font-bold rounded">Senior 60+</span>' : ''}
+                  </h4>
+                  <p class="text-[10px] text-slate-500">DNI: <b>${a.dni || 'Sin DNI'}</b> • Tel: <b>${a.telefono}</b></p>
+                </div>
+                <div>
+                  ${badgeHab}
+                </div>
+              </div>
+
+              <div class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 space-y-1">
+                <div><b>Patología:</b> ${a.patologias || 'Sin patologías'}</div>
+                <div><b>Plan:</b> ${a.obraSocial || 'Particular'} ${a.carnetObraSocial ? `(Carnet: ${a.carnetObraSocial})` : ''}</div>
+                <div class="text-pk-purple font-semibold"><b>A cargo:</b> ${a.kinesiologo || 'Lic. Gustavo Moyano'}</div>
+              </div>
+
+              <div>
+                <span class="text-[10px] font-bold text-slate-500 block mb-1">Turnos Semanales:</span>
+                <div class="flex flex-wrap items-center">
+                  ${turnosBadges}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div>
+                  <span class="text-xs font-black text-slate-900">$${(a.montoMensual || 50000).toLocaleString('es-AR')}</span>
+                  <div class="mt-0.5">${badgeEstado}</div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  ${a.estado !== 'al_dia' 
+                    ? `<button onclick="registrarPagoClick(${a.id})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-bold" title="Cobrar"><i class="fa-solid fa-check"></i> Cobrado</button>` 
+                    : ''}
+                  <a href="https://wa.me/${a.telefono.replace(/\D/g, '')}?text=${msgRecordatorio}" target="_blank" class="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200">
+                    <i class="fa-brands fa-whatsapp"></i>
+                  </a>
+                  <button onclick="editarAlumnoModal(${a.id})" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-200">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="eliminarAlumnoClick(${a.id})" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold border border-rose-200">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function abrirModalAlumno() {
+      document.getElementById('modalAlumnoEditId').value = '';
+      document.getElementById('modalAlumnoTitulo').innerText = 'Registrar Nuevo Alumno (Alta)';
+      document.getElementById('aluNombre').value = '';
+      document.getElementById('aluDni').value = '';
+      document.getElementById('aluTel').value = '';
+      document.getElementById('aluHabilitado').checked = true;
+      document.getElementById('aluHabilitadoTexto').innerText = 'Habilitado';
+      document.getElementById('aluGrupoEtario').value = 'adulto';
+      document.getElementById('aluKinesiologo').value = 'Lic. Gustavo Moyano';
+      document.getElementById('aluObraSocial').value = 'Particular';
+      document.getElementById('aluCarnetOS').value = '';
+      document.getElementById('aluMonto').value = '50000';
+      document.getElementById('aluPatologias').value = '';
+      document.getElementById('aluObservaciones').value = '';
+      document.getElementById('aluEstado').value = 'al_dia';
+      document.getElementById('modalAlumno').classList.remove('hidden');
+    }
+
+    function editarAlumnoModal(id) {
+      const alumno = window.PKStore.alumnos.find(a => a.id === id);
+      if (!alumno) return;
+      document.getElementById('modalAlumnoEditId').value = alumno.id;
+      document.getElementById('modalAlumnoTitulo').innerText = 'Modificar Ficha de Alumno';
+      document.getElementById('aluNombre').value = alumno.nombre;
+      document.getElementById('aluDni').value = alumno.dni || '';
+      document.getElementById('aluTel').value = alumno.telefono;
+      const esHab = (alumno.habilitado !== false);
+      document.getElementById('aluHabilitado').checked = esHab;
+      document.getElementById('aluHabilitadoTexto').innerText = esHab ? 'Habilitado' : 'Inhabilitado';
+      document.getElementById('aluGrupoEtario').value = alumno.grupoEtario || 'adulto';
+      document.getElementById('aluKinesiologo').value = alumno.kinesiologo || 'Lic. Gustavo Moyano';
+      document.getElementById('aluObraSocial').value = alumno.obraSocial || 'Particular';
+      document.getElementById('aluCarnetOS').value = alumno.carnetObraSocial || '';
+      document.getElementById('aluMonto').value = alumno.montoMensual;
+      document.getElementById('aluPatologias').value = alumno.patologias || '';
+      document.getElementById('aluObservaciones').value = alumno.observaciones || '';
+      document.getElementById('aluEstado').value = alumno.estado;
+      document.getElementById('modalAlumno').classList.remove('hidden');
+    }
+
+    function cerrarModalAlumno() {
+      document.getElementById('modalAlumno').classList.add('hidden');
+    }
+
+    async function guardarAlumnoSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('modalAlumnoEditId').value;
+      const datos = {
+        nombre: document.getElementById('aluNombre').value.trim(),
+        dni: document.getElementById('aluDni').value.trim(),
+        telefono: document.getElementById('aluTel').value.trim(),
+        habilitado: document.getElementById('aluHabilitado').checked,
+        grupoEtario: document.getElementById('aluGrupoEtario').value,
+        kinesiologo: document.getElementById('aluKinesiologo').value,
+        obraSocial: document.getElementById('aluObraSocial').value,
+        carnetObraSocial: document.getElementById('aluCarnetOS').value.trim(),
+        montoMensual: parseInt(document.getElementById('aluMonto').value),
+        patologias: document.getElementById('aluPatologias').value.trim(),
+        observaciones: document.getElementById('aluObservaciones').value.trim(),
+        estado: document.getElementById('aluEstado').value
+      };
+
+      if (id) {
+        await window.PKStore.actualizarAlumno(id, datos);
+      } else {
+        await window.PKStore.crearAlumno(datos);
+      }
+
+      cerrarModalAlumno();
+      renderAdminDashboard();
+      onCambioProfeAlumno();
+    }
+
+    async function eliminarAlumnoClick(id) {
+      if (confirm('¿Confirmas la baja de este alumno? Se removerá también de sus turnos asignados.')) {
+        await window.PKStore.eliminarAlumno(id);
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    async function registrarPagoClick(id) {
+      await window.PKStore.registrarPagoAlumno(id);
+      renderAdminDashboard();
+    }
+
+    // ==========================================
+    // ABM PROFESORES / LICENCIADOS
+    // ==========================================
+    function renderAdminProfesores() {
+      const container = document.getElementById('gridAdminProfesores');
+      if (!container) return;
+
+      container.innerHTML = window.PKStore.profesionales.map(p => {
+        const turnosProfe = window.PKStore.turnos.filter(t => t.profesorId === p.id);
+        const totalAlumnos = turnosProfe.reduce((acc, t) => acc + t.inscriptos.length, 0);
+        const totalCamas = turnosProfe.reduce((acc, t) => acc + t.cupoMax, 0);
+
+        return `
+          <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4 shadow-xs">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2.5 py-0.5 bg-pk-purple text-white text-[10px] font-black rounded-md tracking-wider">${p.matricula}</span>
+                <span class="text-[10px] ${p.activo !== false ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-100 border-slate-200'} font-bold px-2.5 py-0.5 rounded-full border">
+                  ${p.activo !== false ? '● Kinesiólogo Activo' : '○ En Licencia / Pausado'}
+                </span>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-purple-100 text-pk-purple flex items-center justify-center font-black text-xl shadow-inner shrink-0">
+                  <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-black text-slate-900">${p.nombre}</h4>
+                  <p class="text-xs text-pk-tealDark font-bold">${p.especialidad}</p>
+                  <p class="text-[11px] text-slate-600 mt-1"><b>Días de Atención:</b> ${p.diasAtencion || 'A coordinar'}</p>
+                  <p class="text-[10px] text-slate-500 font-medium">${p.turnosDetalle || ''}</p>
+                </div>
+              </div>
+
+              <!-- Estadísticas de Clases -->
+              <div class="grid grid-cols-2 gap-2 mt-3 bg-slate-100/70 p-2.5 rounded-xl text-center text-xs">
+                <div>
+                  <span class="text-[10px] text-slate-500 uppercase font-bold block">Horarios Asignados</span>
+                  <span class="font-black text-slate-900">${turnosProfe.length} turnos</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-500 uppercase font-bold block">Ocupación de Camas</span>
+                  <span class="font-black text-pk-purple">${totalAlumnos} / ${totalCamas} alumnos</span>
+                </div>
+              </div>
+
+              <!-- Datos de Cobro Directo -->
+              <div class="bg-white p-3 rounded-xl border border-purple-100 mt-3 space-y-1.5 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1">
+                  <span class="text-[10px] uppercase font-bold text-pk-purple flex items-center gap-1">
+                    <i class="fa-solid fa-building-columns"></i> Cobros / Transferencias:
+                  </span>
+                  <span class="text-[11px] font-bold text-slate-700">${p.banco}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500 text-[11px]">Titular & CUIT:</span>
+                  <span class="text-slate-800 font-semibold text-[11px]">${p.titular || p.nombre} (${p.cuit || 'CUIT'})</span>
+                </div>
+                <div class="flex items-center justify-between bg-purple-50/50 p-1.5 rounded-lg border border-purple-100">
+                  <span class="text-pk-purple font-mono font-bold text-[11px]">Alias: ${p.alias}</span>
+                  <span class="text-slate-400 font-mono text-[10px]">CBU: ${p.cbu ? p.cbu.slice(0, 8) + '...' : 'CBU'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-200 gap-2">
+              <a href="https://wa.me/${p.telefono ? p.telefono.replace(/\D/g, '') : ''}" target="_blank" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 transition flex items-center gap-1 shadow-2xs">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span class="hidden sm:inline">WhatsApp</span>
+              </a>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="editarProfesorModal(${p.id})" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-lg transition flex items-center gap-1 shadow-2xs">
+                  <i class="fa-solid fa-pen-to-square"></i> Modificar Datos
+                </button>
+                <button onclick="eliminarProfesorClick(${p.id})" class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold rounded-lg transition flex items-center gap-1 shadow-2xs">
+                  <i class="fa-solid fa-trash"></i> Baja
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function abrirModalProfesor() {
+      document.getElementById('modalProfeEditId').value = '';
+      document.getElementById('modalProfeTitulo').innerText = 'Registrar Licenciado / Profesor (Alta)';
+      document.getElementById('profeNombre').value = '';
+      document.getElementById('profeMatricula').value = '';
+      document.getElementById('profeEspecialidad').value = 'Pilates Kinésico & Rehabilitación Funcional';
+      document.getElementById('profeTel').value = '549388';
+      document.getElementById('profeDias').value = 'Lunes a Viernes';
+      document.getElementById('profeTurnosDetalle').value = 'Mañana (08:00 y 09:00 hs) y Siesta (15:00 a 17:00 hs)';
+      document.getElementById('profeBanco').value = 'Banco Macro';
+      document.getElementById('profeTitular').value = '';
+      document.getElementById('profeCuit').value = '';
+      document.getElementById('profeAlias').value = '';
+      document.getElementById('profeCbu').value = '';
+      document.getElementById('profeActivo').checked = true;
+      document.getElementById('modalProfesor').classList.remove('hidden');
+    }
+
+    function editarProfesorModal(id) {
+      const profe = window.PKStore.profesionales.find(p => p.id === id);
+      if (!profe) return;
+      document.getElementById('modalProfeEditId').value = profe.id;
+      document.getElementById('modalProfeTitulo').innerText = `Modificar Datos de ${profe.nombre}`;
+      document.getElementById('profeNombre').value = profe.nombre;
+      document.getElementById('profeMatricula').value = profe.matricula;
+      document.getElementById('profeEspecialidad').value = profe.especialidad;
+      document.getElementById('profeTel').value = profe.telefono;
+      document.getElementById('profeDias').value = profe.diasAtencion || '';
+      document.getElementById('profeTurnosDetalle').value = profe.turnosDetalle || '';
+      document.getElementById('profeBanco').value = profe.banco || '';
+      document.getElementById('profeTitular').value = profe.titular || profe.nombre;
+      document.getElementById('profeCuit').value = profe.cuit || '';
+      document.getElementById('profeAlias').value = profe.alias || '';
+      document.getElementById('profeCbu').value = profe.cbu || '';
+      document.getElementById('profeActivo').checked = profe.activo !== false;
+      document.getElementById('modalProfesor').classList.remove('hidden');
+    }
+
+    function cerrarModalProfesor() {
+      document.getElementById('modalProfesor').classList.add('hidden');
+    }
+
+    async function guardarProfesorSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('modalProfeEditId').value;
+      const datos = {
+        nombre: document.getElementById('profeNombre').value.trim(),
+        matricula: document.getElementById('profeMatricula').value.trim(),
+        especialidad: document.getElementById('profeEspecialidad').value.trim(),
+        telefono: document.getElementById('profeTel').value.trim(),
+        diasAtencion: document.getElementById('profeDias').value.trim(),
+        turnosDetalle: document.getElementById('profeTurnosDetalle').value.trim(),
+        banco: document.getElementById('profeBanco').value.trim(),
+        titular: document.getElementById('profeTitular').value.trim(),
+        cuit: document.getElementById('profeCuit').value.trim(),
+        alias: document.getElementById('profeAlias').value.trim(),
+        cbu: document.getElementById('profeCbu').value.trim(),
+        activo: document.getElementById('profeActivo').checked
+      };
+
+      if (id) {
+        await window.PKStore.actualizarProfesional(id, datos);
+        alert(`¡Datos del ${datos.nombre} actualizados con éxito!`);
+      } else {
+        await window.PKStore.crearProfesional(datos);
+        alert(`¡Nuevo profesional ${datos.nombre} registrado con éxito!`);
+      }
+
+      cerrarModalProfesor();
+      initFiltros();
+      renderAdminDashboard();
+      onCambioProfeAlumno();
+    }
+
+    async function eliminarProfesorClick(id) {
+      if (window.PKStore.profesionales.length <= 1) {
+        alert('No se puede dar de baja al único profesional activo del estudio.');
+        return;
+      }
+
+      const p = window.PKStore.profesionales.find(x => x.id === id);
+      if (!p) return;
+
+      const turnosProfe = window.PKStore.turnos.filter(t => t.profesorId === id);
+      const totalAlumnos = turnosProfe.reduce((acc, t) => acc + t.inscriptos.length, 0);
+      const otroProfe = window.PKStore.profesionales.find(x => x.id !== id);
+
+      const mensajeConfirmacion = `¿Estás seguro de dar de baja al ${p.nombre}?\n\n` +
+        `Actualmente tiene ${turnosProfe.length} horarios de clases asignados con ${totalAlumnos} alumnos inscriptos.\n\n` +
+        `Para no interrumpir las clases de los alumnos, sus horarios se reasignarán a ${otroProfe ? otroProfe.nombre : 'otro profesional'}.`;
+
+      if (confirm(mensajeConfirmacion)) {
+        await window.PKStore.eliminarProfesional(id);
+        alert(`El ${p.nombre} fue dado de baja y sus turnos fueron reasignados a ${otroProfe.nombre}.`);
+        initFiltros();
+        renderAdminDashboard();
+        onCambioProfeAlumno();
+      }
+    }
+
+    // Promociones y Aranceles
+    function renderAdminPromos() {
+      const container = document.getElementById('gridAdminPromos');
+      container.innerHTML = window.PKStore.promociones.map(p => `
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="px-2 py-0.5 bg-pk-purple text-white text-[10px] font-bold rounded uppercase">${p.tag}</span>
+              <span class="text-xs font-bold ${p.activa ? 'text-emerald-600' : 'text-slate-400'}">
+                ${p.activa ? '● Activa' : '○ Pausada'}
+              </span>
+            </div>
+            <h4 class="text-sm font-black text-slate-900">${p.titulo}</h4>
+            <p class="text-xs text-slate-600 mt-1">${p.descripcion}</p>
+            <div class="mt-2 text-base font-black text-pk-purple">
+              $${(p.precio || 0).toLocaleString('es-AR')} <span class="text-xs font-normal text-slate-400">/mes</span>
+            </div>
+          </div>
+          <button onclick="togglePromoClick(${p.id})" class="px-3 py-1.5 ${p.activa ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} text-xs font-bold rounded-lg transition self-end">
+            ${p.activa ? 'Pausar Publicación' : 'Activar Publicación'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function togglePromoClick(id) {
+      await window.PKStore.togglePromocion(id);
+      renderAdminPromos();
+    }
+
+    function abrirModalNuevaPromo() {
+      document.getElementById('promoTitulo').value = '';
+      document.getElementById('promoDesc').value = '';
+      document.getElementById('promoPrecio').value = '50000';
+      document.getElementById('promoTag').value = 'Convenio';
+      document.getElementById('modalNuevaPromo').classList.remove('hidden');
+    }
+    function cerrarModalNuevaPromo() {
+      document.getElementById('modalNuevaPromo').classList.add('hidden');
+    }
+    async function guardarNuevaPromoSubmit(e) {
+      e.preventDefault();
+      const nueva = {
+        titulo: document.getElementById('promoTitulo').value.trim(),
+        descripcion: document.getElementById('promoDesc').value.trim(),
+        precio: parseInt(document.getElementById('promoPrecio').value),
+        ahorro: 'Tarifa Especial',
+        tag: document.getElementById('promoTag').value.trim() || 'Convenio'
+      };
+      await window.PKStore.crearPromocion(nueva);
+      cerrarModalNuevaPromo();
+      renderAdminPromos();
+    }
+
+    // Datos de Cobro en Vista Alumno
+    function actualizarDatosCobroDisplay() {
+      selectedProfeId = parseInt(document.getElementById('selectProfeCobro').value);
+      renderCobroCard();
+    }
+
+    function renderCobroCard() {
+      const profe = window.PKStore.profesionales.find(p => p.id === selectedProfeId) || window.PKStore.profesionales[0];
+      if (!profe) return;
+
+      document.getElementById('txtBancoNombre').innerText = profe.banco;
+      document.getElementById('txtTitularCuit').innerText = `${profe.titular} (${profe.cuit})`;
+      document.getElementById('txtAliasValue').innerText = profe.alias;
+      document.getElementById('txtCbuValue').innerText = profe.cbu;
+    }
+
+    function copiarTexto(elementId, btnId) {
+      const texto = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(texto).then(() => {
+        const btn = document.getElementById(btnId);
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ¡Copiado!`;
+        btn.classList.add('bg-emerald-50', 'text-emerald-700');
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.remove('bg-emerald-50', 'text-emerald-700');
+        }, 2000);
+      });
+    }
+
+    function enviarComprobantePorWhatsApp() {
+      const profe = window.PKStore.profesionales.find(p => p.id === selectedProfeId) || window.PKStore.profesionales[0];
+      const tel = profe ? profe.telefono : '5493884123456';
+      const mensaje = encodeURIComponent(
+        `¡Hola PK Pilates Kinésico! Me comunico para confirmar mi turno/arancel mensual con ${profe ? profe.nombre : 'el kinesiólogo'}. Acabo de realizar la transferencia al Alias: ${profe ? profe.alias : ''}. Adjunto comprobante.`
+      );
+      window.open(`https://wa.me/${tel}?text=${mensaje}`, '_blank');
+    }
+
+    // ==========================================
+    // CHATBOT WHATSAPP
+    // ==========================================
+    function toggleChatbot() {
+      document.getElementById('botWindow').classList.toggle('hidden');
+    }
+
+    function botResponder(tipo) {
+      const chat = document.getElementById('chatMessages');
+
+      if (tipo === 'turnos') {
+        let texto = '📅 *HORARIOS Y PROFESIONALES - PILATES KINÉSICO*\n\n';
+        texto += '👨‍⚕️ *Lic. Gustavo Moyano*\n• Lunes a viernes:\n  - Mañana: 08:00 y 09:00 hs.\n  - Siesta: 15:00, 16:00 y 17:00 hs.\n\n';
+        texto += '👩‍⚕️ *Lic. Agustina Maidana*\n• Martes y jueves:\n  - Tarde/Noche: 18:00, 19:00 y 20:00 hs.\n\n';
+        texto += '👉 Podés completar tus datos en el formulario de la web y seleccionar tus horarios con checkboxes.';
+        agregarBurbujaBot(texto);
+      } else if (tipo === 'promos') {
+        let texto = '💰 *ARANCELES MENSUALES*\n\n';
+        texto += '🔹 *Particular:* $50.000 mensuales (Incluye 2 clases semanales).\n\n';
+        texto += '🔹 *Obra Social Instituto de Seguro:* $35.000 mensuales (presentando el carnet correspondiente, incluye 2 clases semanales).\n\n';
+        texto += '💚 *Tu bienestar, en manos de profesionales de la salud.*';
+        agregarBurbujaBot(texto);
+      } else if (tipo === 'beneficios') {
+        let texto = '🧘 *BENEFICIOS DEL PILATES KINÉSICO*\n\n';
+        texto += 'Nuestras clases están a cargo de Licenciados en Kinesiología y Fisioterapia:\n\n';
+        texto += '✔️ Mejorar la movilidad y flexibilidad articular.\n✔️ Fortalecer la musculatura profunda.\n✔️ Mejorar la postura y columna.\n✔️ Prevenir lesiones y contracturas.\n✔️ Promover el bienestar físico y calidad de vida.\n\n';
+        texto += '💚 *Tu bienestar, en manos de profesionales de la salud.*';
+        agregarBurbujaBot(texto);
+      } else if (tipo === 'alias') {
+        let texto = '💳 *Datos de transferencia:*\n\n';
+        texto += '👨‍⚕️ *Lic. Gustavo Moyano*\n• Banco: Banco Macro\n• Alias: `gustavo.moyano.pk`\n• CBU: `2850590940090418135201`\n\n';
+        texto += '👩‍⚕️ *Lic. Agustina Maidana*\n• Mercado Pago (CVU)\n• Alias: `agustina.maidana.pk`\n• CBU/CVU: `0000003100084729184512`\n\n';
+        texto += '📸 Enviá tu comprobante por acá para confirmarte la cama.';
+        agregarBurbujaBot(texto);
+      }
+    }
+
+    function enviarMensajeUsuario(e) {
+      e.preventDefault();
+      const input = document.getElementById('inputChatMsg');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      agregarBurbujaUsuario(msg);
+      input.value = '';
+
+      setTimeout(() => {
+        agregarBurbujaBot('¡Recibido! Para confirmarte la cama con el Lic. Gustavo Moyano o la Lic. Agustina Maidana, podés completar tu inscripción con los checkboxes en la web o consultar por "📅 Horarios" o "💰 Aranceles".');
+      }, 700);
+    }
+
+    function agregarBurbujaUsuario(texto) {
+      const chat = document.getElementById('chatMessages');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      chat.innerHTML += `
+        <div class="flex flex-col items-end">
+          <div class="bg-[#d9fdd3] rounded-2xl rounded-tr-none p-2.5 shadow-xs max-w-[85%] text-slate-800 text-[11px]">
+            ${texto}
+            <span class="text-[9px] text-slate-400 block text-right mt-1">${time} <i class="fa-solid fa-check-double text-blue-500"></i></span>
+          </div>
+        </div>
+      `;
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function agregarBurbujaBot(texto) {
+      const chat = document.getElementById('chatMessages');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const formateado = texto.replace(/\n/g, '<br>');
+      chat.innerHTML += `
+        <div class="flex flex-col items-start">
+          <div class="bg-white rounded-2xl rounded-tl-none p-3 shadow-xs max-w-[85%] border border-slate-100 text-slate-800 text-[11px] leading-relaxed">
+            ${formateado}
+            <span class="text-[9px] text-slate-400 block text-right mt-1">${time}</span>
+          </div>
+        </div>
+      `;
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
