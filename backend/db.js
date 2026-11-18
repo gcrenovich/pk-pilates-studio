@@ -613,8 +613,88 @@ class Database {
     return true;
   }
 
+  // Auditoría Automática de Vencimientos y Liberación de Camas Reformer
+  evaluarVencimientosYLiberarCupos() {
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const hoy = new Date(hoyStr);
+    let huboCambios = false;
+    const liberaciones = [];
+
+    if (!Array.isArray(this.data.alumnos) || !Array.isArray(this.data.turnos)) {
+      return { liberaciones, count: 0 };
+    }
+
+    this.data.alumnos.forEach(alumno => {
+      if (!alumno.vencimiento) return;
+      const fVenc = new Date(alumno.vencimiento);
+      const diffMs = fVenc - hoy;
+      const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      // 1. Caso Vencido / Deuda: Si venció o está marcado con deuda o atrasado
+      const estaVencido = diffDias < 0;
+      const tieneDeuda = (alumno.deuda && alumno.deuda > 0);
+      const estaAtrasado = alumno.estado === 'atrasado';
+
+      if (estaVencido || tieneDeuda || estaAtrasado) {
+        // Pausar e inhabilitar automáticamente
+        if (alumno.habilitado !== false) {
+          alumno.habilitado = false;
+          huboCambios = true;
+        }
+        if (alumno.estado !== 'atrasado') {
+          alumno.estado = 'atrasado';
+          huboCambios = true;
+        }
+        if (!alumno.deuda || alumno.deuda <= 0) {
+          alumno.deuda = alumno.montoMensual || 50000;
+          huboCambios = true;
+        }
+
+        // LIBERACIÓN AUTOMÁTICA DE CAMA:
+        // Se desinscribe de los turnos para que otros alumnos puedan ver y reservar el cupo
+        const nombreBuscado = (alumno.nombre || '').trim().toLowerCase();
+        if (nombreBuscado) {
+          this.data.turnos.forEach(t => {
+            if (Array.isArray(t.inscriptos)) {
+              const cantAntes = t.inscriptos.length;
+              t.inscriptos = t.inscriptos.filter(nom => nom.trim().toLowerCase() !== nombreBuscado);
+              if (t.inscriptos.length < cantAntes) {
+                huboCambios = true;
+                liberaciones.push({
+                  alumnoId: alumno.id,
+                  alumnoNombre: alumno.nombre,
+                  turnoId: t.id,
+                  dia: t.dia,
+                  hora: t.hora
+                });
+                console.log(`[Auto-Pausa] Cama liberada en ${t.dia} ${t.hora} por vencimiento de ${alumno.nombre}`);
+              }
+            }
+          });
+        }
+      } else if (diffDias <= 5) {
+        if (alumno.estado !== 'por_vencer' && alumno.estado !== 'atrasado') {
+          alumno.estado = 'por_vencer';
+          huboCambios = true;
+        }
+      } else {
+        if (alumno.estado === 'por_vencer') {
+          alumno.estado = 'al_dia';
+          huboCambios = true;
+        }
+      }
+    });
+
+    if (huboCambios) {
+      this.save();
+    }
+
+    return { liberaciones, count: liberaciones.length };
+  }
+
   // Alumnos
   getAlumnos() {
+    this.evaluarVencimientosYLiberarCupos();
     return this.data.alumnos;
   }
 
@@ -661,6 +741,17 @@ class Database {
     const alumno = this.data.alumnos.find(a => a.id === parseInt(id));
     if (alumno) {
       alumno.habilitado = !alumno.habilitado;
+      // Si se pasa manualmente a En Pausa / Inhabilitado, liberar sus camas
+      if (!alumno.habilitado) {
+        const nombreBuscado = (alumno.nombre || '').trim().toLowerCase();
+        if (nombreBuscado) {
+          this.data.turnos.forEach(t => {
+            if (Array.isArray(t.inscriptos)) {
+              t.inscriptos = t.inscriptos.filter(nom => nom.trim().toLowerCase() !== nombreBuscado);
+            }
+          });
+        }
+      }
       this.save();
       return alumno;
     }
@@ -684,6 +775,7 @@ class Database {
     const alumno = this.data.alumnos.find(a => a.id === parseInt(alumnoId));
     if (alumno) {
       alumno.estado = 'al_dia';
+      alumno.habilitado = true; // REHABILITADO AUTOMÁTICAMENTE AL ABONAR
       alumno.deuda = 0;
       alumno.ultimoPago = new Date().toISOString().split('T')[0];
       const proximo = new Date();
@@ -697,6 +789,7 @@ class Database {
 
   // Turnos & Camas
   getTurnos() {
+    this.evaluarVencimientosYLiberarCupos();
     return this.data.turnos;
   }
 
@@ -730,6 +823,7 @@ class Database {
   }
 
   reservarCupo(turnoId, nombreAlumno, telefono, metodoPago, obraSocial) {
+    this.evaluarVencimientosYLiberarCupos();
     const turno = this.data.turnos.find(t => t.id === parseInt(turnoId));
     if (!turno) return { ok: false, msg: 'Turno no encontrado' };
     if (turno.inscriptos.length >= turno.cupoMax) {
@@ -737,6 +831,15 @@ class Database {
     }
     if (turno.inscriptos.includes(nombreAlumno)) {
       return { ok: false, msg: 'Ya tienes reservada una cama en este turno.' };
+    }
+
+    // Validar si el alumno ya existe en el padrón y está en pausa o atrasado
+    let alumno = this.data.alumnos.find(a => a.nombre.toLowerCase() === nombreAlumno.toLowerCase());
+    if (alumno && (alumno.habilitado === false || alumno.estado === 'atrasado')) {
+      return {
+        ok: false,
+        msg: `El alumno "${alumno.nombre}" se encuentra en pausa o con cuota vencida. Debe regularizar su estado para poder reservar una cama Reformer.`
+      };
     }
 
     turno.inscriptos.push(nombreAlumno);

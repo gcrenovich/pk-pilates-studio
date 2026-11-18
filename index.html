@@ -569,10 +569,16 @@
                 <p class="text-xs text-slate-500">Administra altas, estado de habilitación médica, patologías, turnos asignados a camas reformer y cobranzas mensuales.</p>
               </div>
 
-              <button onclick="abrirModalAlumno()" class="px-4 py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer self-start md:self-auto shrink-0">
-                <i class="fa-solid fa-user-plus"></i>
-                Registrar Nuevo Alumno (Alta)
-              </button>
+              <div class="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
+                <button onclick="auditarVencimientosManualClick()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs rounded-xl shadow-2xs flex items-center gap-2 transition cursor-pointer" title="Verifica cuotas vencidas y libera automáticamente camas Reformer">
+                  <i class="fa-solid fa-bolt text-amber-600"></i>
+                  <span>Auditar Vencimientos & Cupos</span>
+                </button>
+                <button onclick="abrirModalAlumno()" class="px-4 py-2.5 bg-pk-purple hover:bg-pk-purpleDark text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                  <i class="fa-solid fa-user-plus"></i>
+                  Registrar Nuevo Alumno (Alta)
+                </button>
+              </div>
             </div>
 
             <!-- Barra de Búsqueda en Vivo & Filtros Rápidos -->
@@ -2465,10 +2471,25 @@
         const alumnosPadron = [...window.PKStore.alumnos].sort((a,b) => a.nombre.localeCompare(b.nombre));
         const padronOptions = alumnosPadron.map(a => {
           const estaInscripto = turno.inscriptos.some(n => n.toLowerCase() === a.nombre.toLowerCase());
-          const estadoTxt = a.habilitado === false ? ' [PAUSADO/INHABILITADO]' : '';
+          const estaPausado = (a.habilitado === false || a.estado === 'atrasado');
           const dniTxt = a.dni ? ` (DNI ${a.dni})` : '';
-          const disTxt = estaInscripto ? ' disabled' : '';
-          const inscriptoTxt = estaInscripto ? ' • (Ya inscripto en este horario)' : '';
+          let estadoTxt = '';
+          let disTxt = '';
+          let inscriptoTxt = '';
+
+          if (estaInscripto) {
+            estadoTxt = ' • (Ya inscripto en este turno)';
+            disTxt = ' disabled';
+          } else if (estaPausado) {
+            estadoTxt = ' ⛔ [EN PAUSA / VENCIDO]';
+            disTxt = '';
+            inscriptoTxt = ' • (Requiere registrar cobro para asignar)';
+          } else if (a.estado === 'por_vencer') {
+            estadoTxt = ' 🟡 [POR VENCER]';
+          } else {
+            estadoTxt = ' 🟢 [AL DÍA]';
+          }
+
           return `<option value="${a.id}" ${disTxt}>${a.nombre}${dniTxt}${estadoTxt}${inscriptoTxt}</option>`;
         }).join('');
 
@@ -2541,8 +2562,8 @@
         inputNombre.value = alumno.nombre;
         inputTel.value = alumno.telefono || '';
         if (aviso) {
-          if (alumno.habilitado === false) {
-            aviso.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> <b>Nota:</b> ${alumno.nombre} está actualmente marcado como <i>Inhabilitado / En Pausa</i> en el padrón. Al asignarlo a este turno se registrará y se habilitará para la clase.`;
+          if (alumno.habilitado === false || alumno.estado === 'atrasado') {
+            aviso.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> <b>Atención:</b> ${alumno.nombre} está actualmente <i>En Pausa / Vencido</i> (Deuda: $${(alumno.deuda || alumno.montoMensual || 50000).toLocaleString('es-AR')}). Al confirmar la asignación, se registrará su cobro, quedará rehabilitado y se le asignará la cama Reformer.`;
             aviso.classList.remove('hidden');
           } else {
             aviso.classList.add('hidden');
@@ -2573,10 +2594,12 @@
       const tel = inputTel ? inputTel.value.trim() : '';
       if (!nombre) return;
 
-      // Si el alumno seleccionado estaba inhabilitado en el padrón, lo habilitamos
+      // Si el alumno seleccionado estaba inhabilitado o con cuota vencida, registramos pago y rehabilitamos
       const alumnoExistente = window.PKStore.alumnos.find(a => a.nombre.toLowerCase() === nombre.toLowerCase());
-      if (alumnoExistente && alumnoExistente.habilitado === false) {
-        await window.PKStore.actualizarAlumno(alumnoExistente.id, { habilitado: true });
+      if (alumnoExistente && (alumnoExistente.habilitado === false || alumnoExistente.estado === 'atrasado')) {
+        const confirmarCobro = confirm(`El alumno ${alumnoExistente.nombre} tiene su cuota vencida ($${(alumnoExistente.deuda || alumnoExistente.montoMensual || 50000).toLocaleString('es-AR')}).\n\n¿Deseas registrar el cobro de la cuota mensual para rehabilitarlo y asignarle la cama?`);
+        if (!confirmarCobro) return;
+        await window.PKStore.registrarPagoAlumno(alumnoExistente.id);
       }
 
       const res = await window.PKStore.asignarCupoAlumno(turnoId, nombre, tel);
@@ -3049,6 +3072,31 @@
     async function registrarPagoClick(id) {
       await window.PKStore.registrarPagoAlumno(id);
       renderAdminDashboard();
+      onCambioProfeAlumno();
+    }
+
+    async function auditarVencimientosManualClick() {
+      if (window.PKStore.isApiConnected) {
+        try {
+          const res = await fetch('/api/alumnos/auditar-vencimientos', { method: 'POST' });
+          if (res.ok) {
+            const data = await res.json();
+            await window.PKStore.syncWithBackend();
+            renderAdminDashboard();
+            onCambioProfeAlumno();
+            if (data.count > 0) {
+              alert(`⚡ Auditoría de Vencimientos Ejecutada:\n\nSe detectaron ${data.count} turno(s) retenidos por alumnos con cuotas vencidas y fueron liberados automáticamente para que nuevos alumnos puedan reservar su cama Reformer.`);
+            } else {
+              alert(`✅ Auditoría al Día:\n\nTodos los alumnos inscriptos en camas Reformer están al día o con cuotas vigentes.`);
+            }
+            return;
+          }
+        } catch (e) {}
+      }
+      window.PKStore.evaluarVencimientosYLiberarCupos();
+      renderAdminDashboard();
+      onCambioProfeAlumno();
+      alert('✅ Auditoría de vencimientos ejecutada localmente.');
     }
 
     // ==========================================

@@ -764,7 +764,67 @@ const PKStore = {
     }
     this.promociones = this.load(STORAGE_KEYS.PROMOCIONES, SEED_DATA.promociones);
 
+    this.evaluarVencimientosYLiberarCupos();
     await this.syncWithBackend();
+  },
+
+  evaluarVencimientosYLiberarCupos() {
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const hoy = new Date(hoyStr);
+    let huboCambios = false;
+
+    if (!Array.isArray(this.alumnos) || !Array.isArray(this.turnos)) return;
+
+    this.alumnos.forEach(alumno => {
+      if (!alumno.vencimiento) return;
+      const fVenc = new Date(alumno.vencimiento);
+      const diffDias = Math.ceil((fVenc - hoy) / (1000 * 60 * 60 * 24));
+
+      const estaVencido = diffDias < 0;
+      const tieneDeuda = (alumno.deuda && alumno.deuda > 0);
+      const estaAtrasado = alumno.estado === 'atrasado';
+
+      if (estaVencido || tieneDeuda || estaAtrasado) {
+        if (alumno.habilitado !== false) {
+          alumno.habilitado = false;
+          huboCambios = true;
+        }
+        if (alumno.estado !== 'atrasado') {
+          alumno.estado = 'atrasado';
+          huboCambios = true;
+        }
+        if (!alumno.deuda || alumno.deuda <= 0) {
+          alumno.deuda = alumno.montoMensual || 50000;
+          huboCambios = true;
+        }
+
+        // Liberar camas ocupadas por alumnos con cuotas vencidas
+        const nombreBuscado = (alumno.nombre || '').trim().toLowerCase();
+        if (nombreBuscado) {
+          this.turnos.forEach(t => {
+            if (Array.isArray(t.inscriptos)) {
+              const cantAntes = t.inscriptos.length;
+              t.inscriptos = t.inscriptos.filter(nom => nom.trim().toLowerCase() !== nombreBuscado);
+              if (t.inscriptos.length < cantAntes) huboCambios = true;
+            }
+          });
+        }
+      } else if (diffDias <= 5) {
+        if (alumno.estado !== 'por_vencer' && alumno.estado !== 'atrasado') {
+          alumno.estado = 'por_vencer';
+          huboCambios = true;
+        }
+      } else {
+        if (alumno.estado === 'por_vencer') {
+          alumno.estado = 'al_dia';
+          huboCambios = true;
+        }
+      }
+    });
+
+    if (huboCambios) {
+      this.saveAllLocal();
+    }
   },
 
   load(key, fallback) {
@@ -1098,6 +1158,7 @@ const PKStore = {
     const alumno = this.alumnos.find(a => a.id === idNum);
     if (alumno) {
       alumno.estado = 'al_dia';
+      alumno.habilitado = true; // REHABILITADO AUTOMÁTICAMENTE AL ABONAR
       alumno.deuda = 0;
       alumno.ultimoPago = new Date().toISOString().split('T')[0];
       const proximo = new Date();

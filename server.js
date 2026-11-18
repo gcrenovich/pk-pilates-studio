@@ -156,6 +156,11 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, 200, updated);
   }
 
+  if (pathname === '/api/alumnos/auditar-vencimientos' && method === 'POST') {
+    const resAuditoria = db.evaluarVencimientosYLiberarCupos();
+    return sendJSON(res, 200, resAuditoria);
+  }
+
   // 4. ABM TURNOS, HORARIOS Y CAMAS REFORMER
   if (pathname === '/api/turnos' && method === 'GET') {
     return sendJSON(res, 200, db.getTurnos());
