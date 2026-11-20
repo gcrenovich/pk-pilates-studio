@@ -55,11 +55,8 @@
       "hora": "08:00 - 09:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Mañana)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Estela Benítez",
-        "Claudia Ruiz"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 102,
@@ -67,11 +64,8 @@
       "hora": "15:00 - 16:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Marcos Juárez",
-        "Ana Castro"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 103,
@@ -79,12 +73,8 @@
       "hora": "16:00 - 17:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Rodrigo Morales",
-        "Camila Ortiz",
-        "Lucas Díaz"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 104,
@@ -92,10 +82,8 @@
       "hora": "17:00 - 18:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Valeria Gómez"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 105,
@@ -103,10 +91,8 @@
       "hora": "08:00 - 09:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Mañana)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Estela Benítez"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 106,
@@ -114,10 +100,8 @@
       "hora": "15:00 - 16:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Carla Rossi"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 107,
@@ -125,10 +109,8 @@
       "hora": "16:00 - 17:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Sebastián Ríos"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 108,
@@ -136,11 +118,8 @@
       "hora": "17:00 - 18:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Julieta Silva",
-        "Paula Bravo"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 109,
@@ -148,11 +127,8 @@
       "hora": "18:00 - 19:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Tarde/Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Mónica Tapia",
-        "Patricia Sosa"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 110,
@@ -160,13 +136,8 @@
       "hora": "19:00 - 20:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Tarde/Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Mariano Vega",
-        "Lorena Castillo",
-        "Fabiana Paz",
-        "Nicolás Albarracín"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 111,
@@ -174,10 +145,8 @@
       "hora": "20:00 - 21:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Gonzalo Torres"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 112,
@@ -185,10 +154,8 @@
       "hora": "08:00 - 09:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Mañana)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Claudia Ruiz"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 113,
@@ -196,10 +163,8 @@
       "hora": "15:00 - 16:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Marcos Juárez"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 114,
@@ -207,10 +172,8 @@
       "hora": "16:00 - 17:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Camila Ortiz"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 115,
@@ -218,11 +181,8 @@
       "hora": "17:00 - 18:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Valeria Gómez",
-        "Agustina Peña"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 116,
@@ -230,10 +190,8 @@
       "hora": "08:00 - 09:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Mañana)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Estela Benítez"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 117,
@@ -241,10 +199,8 @@
       "hora": "15:00 - 16:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Carla Rossi"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 118,
@@ -252,11 +208,8 @@
       "hora": "16:00 - 17:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Sebastián Ríos",
-        "Federico Lamas"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 119,
@@ -264,10 +217,8 @@
       "hora": "17:00 - 18:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Julieta Silva"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 120,
@@ -275,10 +226,8 @@
       "hora": "18:00 - 19:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Tarde/Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Mónica Tapia"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 121,
@@ -286,11 +235,8 @@
       "hora": "19:00 - 20:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Tarde/Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Mariano Vega",
-        "Lorena Castillo"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 122,
@@ -298,11 +244,8 @@
       "hora": "20:00 - 21:00",
       "profesorId": 2,
       "tipo": "Pilates Kinésico (Noche)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Gonzalo Torres",
-        "Martín Gil"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 123,
@@ -310,11 +253,8 @@
       "hora": "08:00 - 09:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Mañana)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Claudia Ruiz",
-        "Lucas Díaz"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 124,
@@ -322,10 +262,8 @@
       "hora": "15:00 - 16:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Ana Castro"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 125,
@@ -333,10 +271,8 @@
       "hora": "16:00 - 17:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
-      "inscriptos": [
-        "Rodrigo Morales"
-      ]
+      "cupoMax": 6,
+      "inscriptos": []
     },
     {
       "id": 126,
@@ -344,335 +280,11 @@
       "hora": "17:00 - 18:00",
       "profesorId": 1,
       "tipo": "Pilates Kinésico (Siesta)",
-      "cupoMax": 4,
+      "cupoMax": 6,
       "inscriptos": []
     }
   ],
-  "alumnos": [
-    {
-      "id": 201,
-      "nombre": "Estela Benítez",
-      "dni": "28.452.190",
-      "telefono": "5493884891234",
-      "habilitado": true,
-      "patologias": "Cervicobraquialgia crónica",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-04",
-      "vencimiento": "2026-12-04",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Evaluación postural inicial completa. Buena evolución."
-    },
-    {
-      "id": 202,
-      "nombre": "Mariano Vega",
-      "dni": "32.145.890",
-      "telefono": "5493885123987",
-      "habilitado": true,
-      "patologias": "Hernia discal lumbar L5-S1",
-      "grupoEtario": "adulto",
-      "plan": "Obra Social Instituto de Seguro (2 clases semanales)",
-      "montoMensual": 35000,
-      "obraSocial": "Obra Social Instituto de Seguro",
-      "carnetObraSocial": "84920",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-02",
-      "vencimiento": "2026-12-02",
-      "kinesiologo": "Lic. Agustina Maidana",
-      "deuda": 0,
-      "observaciones": "Evitar flexiones bruscas de tronco. Refuerzo de core."
-    },
-    {
-      "id": 203,
-      "nombre": "Claudia Ruiz",
-      "dni": "35.678.912",
-      "telefono": "5493884321765",
-      "habilitado": true,
-      "patologias": "Rehabilitación postural global / escoliosis",
-      "grupoEtario": "adulto",
-      "plan": "Obra Social Instituto de Seguro (2 clases semanales)",
-      "montoMensual": 35000,
-      "obraSocial": "Obra Social Instituto de Seguro",
-      "carnetObraSocial": "12450",
-      "estado": "por_vencer",
-      "ultimoPago": "2026-10-20",
-      "vencimiento": "2026-11-20",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Asimetría escapular. Trabajo de elongación axial."
-    },
-    {
-      "id": 204,
-      "nombre": "Lorena Castillo",
-      "dni": "29.876.543",
-      "telefono": "5493885678432",
-      "habilitado": true,
-      "patologias": "Tendinopatía de manguito rotador",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "atrasado",
-      "ultimoPago": "2026-09-30",
-      "vencimiento": "2026-10-30",
-      "kinesiologo": "Lic. Agustina Maidana",
-      "deuda": 50000,
-      "observaciones": "Ejercicios de estabilización glenohumeral con resortes livianos."
-    },
-    {
-      "id": 205,
-      "nombre": "Marcos Juárez",
-      "dni": "31.220.456",
-      "telefono": "5493884112233",
-      "habilitado": true,
-      "patologias": "Lumbalgia mecánica postural",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-05",
-      "vencimiento": "2026-12-05",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Fortalecimiento de multífidos y transverso abdominal."
-    },
-    {
-      "id": 206,
-      "nombre": "Ana Castro",
-      "dni": "24.331.876",
-      "telefono": "5493884445566",
-      "habilitado": true,
-      "patologias": "Artrosis de cadera bilateral",
-      "grupoEtario": "adulto_mayor",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-01",
-      "vencimiento": "2026-12-01",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Movilidad suave sin impacto. Excelente apego al tratamiento."
-    },
-    {
-      "id": 207,
-      "nombre": "Rodrigo Morales",
-      "dni": "36.901.234",
-      "telefono": "5493885778899",
-      "habilitado": true,
-      "patologias": "Rectificación cervical y bruxismo",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-10",
-      "vencimiento": "2026-12-10",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Relajación miofascial suboccipital y movilidad torácica."
-    },
-    {
-      "id": 208,
-      "nombre": "Camila Ortiz",
-      "dni": "38.412.309",
-      "telefono": "5493885123456",
-      "habilitado": true,
-      "patologias": "Escoliosis dorsal idiopática",
-      "grupoEtario": "adulto",
-      "plan": "Obra Social Instituto de Seguro (2 clases semanales)",
-      "montoMensual": 35000,
-      "obraSocial": "Obra Social Instituto de Seguro",
-      "carnetObraSocial": "45129",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-06",
-      "vencimiento": "2026-12-06",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Trabajo correctivo con resortes asimétricos."
-    },
-    {
-      "id": 209,
-      "nombre": "Lucas Díaz",
-      "dni": "33.789.654",
-      "telefono": "5493884998877",
-      "habilitado": true,
-      "patologias": "Post-rehabilitación LCA rodilla derecha",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-03",
-      "vencimiento": "2026-12-03",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Propiocepción y cadena cerrada en reformer."
-    },
-    {
-      "id": 210,
-      "nombre": "Valeria Gómez",
-      "dni": "34.567.890",
-      "telefono": "5493885332211",
-      "habilitado": true,
-      "patologias": "Cervicalgia tensional y cefaleas",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-07",
-      "vencimiento": "2026-12-07",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Ejercicios de respiración y relajación escapular."
-    },
-    {
-      "id": 211,
-      "nombre": "Carla Rossi",
-      "dni": "30.123.456",
-      "telefono": "5493884776655",
-      "habilitado": true,
-      "patologias": "Reeducación postural integral",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-08",
-      "vencimiento": "2026-12-08",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Tonificación general y contrología."
-    },
-    {
-      "id": 212,
-      "nombre": "Sebastián Ríos",
-      "dni": "31.987.654",
-      "telefono": "5493885223344",
-      "habilitado": true,
-      "patologias": "Protrusión discal L4-L5",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-09",
-      "vencimiento": "2026-12-09",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Control pélvico neutral. Asiste regularmente."
-    },
-    {
-      "id": 213,
-      "nombre": "Julieta Silva",
-      "dni": "39.012.345",
-      "telefono": "5493885667788",
-      "habilitado": true,
-      "patologias": "Tendinopatía rotuliana",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-04",
-      "vencimiento": "2026-12-04",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 0,
-      "observaciones": "Fortalecimiento de cuádriceps excéntrico."
-    },
-    {
-      "id": 214,
-      "nombre": "Mónica Tapia",
-      "dni": "27.890.123",
-      "telefono": "5493885446688",
-      "habilitado": true,
-      "patologias": "Discopatía cervical C5-C6",
-      "grupoEtario": "adulto",
-      "plan": "Obra Social Instituto de Seguro (2 clases semanales)",
-      "montoMensual": 35000,
-      "obraSocial": "Obra Social Instituto de Seguro",
-      "carnetObraSocial": "78901",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-02",
-      "vencimiento": "2026-12-02",
-      "kinesiologo": "Lic. Agustina Maidana",
-      "deuda": 0,
-      "observaciones": "Control de cintura escapular y corrección postural."
-    },
-    {
-      "id": 215,
-      "nombre": "Gonzalo Torres",
-      "dni": "28.901.234",
-      "telefono": "5493885664466",
-      "habilitado": true,
-      "patologias": "Lumbalgia crónica postural",
-      "grupoEtario": "adulto",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "al_dia",
-      "ultimoPago": "2026-11-05",
-      "vencimiento": "2026-12-05",
-      "kinesiologo": "Lic. Agustina Maidana",
-      "deuda": 0,
-      "observaciones": "Elongación de isquiotibiales y psoas."
-    },
-    {
-      "id": 216,
-      "nombre": "Roberto Fernández",
-      "dni": "25.678.910",
-      "telefono": "5493884667788",
-      "habilitado": false,
-      "patologias": "Gonalgia bilateral leve",
-      "grupoEtario": "adulto_mayor",
-      "plan": "Particular (2 clases semanales)",
-      "montoMensual": 50000,
-      "obraSocial": "Particular",
-      "carnetObraSocial": "",
-      "estado": "atrasado",
-      "ultimoPago": "2026-08-15",
-      "vencimiento": "2026-09-15",
-      "kinesiologo": "Lic. Gustavo Moyano",
-      "deuda": 50000,
-      "observaciones": "Pausado temporalmente por viaje. Inhabilitado para turnos hasta reactivación."
-    },
-    {
-      "id": 217,
-      "nombre": "Marta Solís",
-      "dni": "23.456.789",
-      "telefono": "5493884223399",
-      "habilitado": false,
-      "patologias": "Osteopenia y lumbalgia",
-      "grupoEtario": "adulto_mayor",
-      "plan": "Obra Social Instituto de Seguro (2 clases semanales)",
-      "montoMensual": 35000,
-      "obraSocial": "Obra Social Instituto de Seguro",
-      "carnetObraSocial": "91234",
-      "estado": "por_vencer",
-      "ultimoPago": "2026-10-18",
-      "vencimiento": "2026-11-18",
-      "kinesiologo": "Lic. Agustina Maidana",
-      "deuda": 0,
-      "observaciones": "En reposo médico preventivo. Retoma el próximo mes."
-    }
-  ],
+  "alumnos": [],
   "promociones": [
     {
       "id": 301,

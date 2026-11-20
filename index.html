@@ -1479,8 +1479,17 @@
     let _selectedTurnoIdDetalle = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Registrar versión de sincronización preservando todos los datos de alumnos, turnos y pagos
-      localStorage.setItem('pk_version_oficial', '7.0');
+      // Registrar versión de sincronización autoritativa en la nube (PostgreSQL)
+      localStorage.setItem('pk_version_oficial', '8.0');
+
+      // Escuchar eventos de sincronización con la nube para actualizar la vista en tiempo real
+      window.addEventListener('pk:sync-completed', () => {
+        actualizarBadgeStatus();
+        initFiltros();
+        renderCobroCard();
+        renderAdminDashboard();
+        if (typeof onCambioProfeAlumno === 'function') onCambioProfeAlumno();
+      });
 
       await window.PKStore.init();
       actualizarBadgeStatus();
